@@ -1,0 +1,34 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@500&display=block" rel="stylesheet">
+<style>
+  html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#030712}
+  body{position:relative;font-family:Inter,sans-serif;color:#e5e7eb}
+  canvas{position:absolute;inset:0}
+  .wrap{position:absolute;inset:0;display:flex;align-items:center;gap:56px;padding:0 80px}
+  img{width:360px;height:360px;filter:drop-shadow(0 20px 40px rgba(0,0,0,.6)) drop-shadow(0 0 40px rgba(212,175,55,.25))}
+  h1{font:700 64px/1.05 Cinzel,serif;letter-spacing:.08em;margin:0 0 18px;background:linear-gradient(100deg,#b8892b,#f3da8c 35%,#fff1b8 60%,#c99a3a);-webkit-background-clip:text;color:transparent}
+  p{margin:0 0 14px;font-size:21px;line-height:1.5;color:#cbd5e1;letter-spacing:.04em}
+  .t{font:600 24px/1.4 Cinzel,serif;color:#e6c778}
+</style></head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<div class="wrap">
+  <img src="../assets/img/dh-coin-front.png" alt="">
+  <div>
+    <h1>DE'ARIS HENRY</h1>
+    <p>Entrepreneur · Business Strategist · Sales &amp; Operations Leader · Recruiter · Investor · Author · Creative Producer</p>
+    <p class="t">Building Businesses. Developing Talent.<br>Connecting Opportunities. Executing Strategy.</p>
+  </div>
+</div>
+<script>
+  const c = document.getElementById('c').getContext('2d');
+  const g = c.createRadialGradient(300, 200, 0, 300, 200, 700); g.addColorStop(0, '#0e1a33'); g.addColorStop(1, '#030712');
+  c.fillStyle = g; c.fillRect(0, 0, 1200, 630);
+  let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 420; i++) { const z = r() ** 2; c.fillStyle = `rgba(255,255,255,${.25 + z * .7})`; c.beginPath(); c.arc(r() * 1200, r() * 630, .4 + z * 1.4, 0, 7); c.fill(); }
+  const m = c.createLinearGradient(1120, 60, 900, 150); m.addColorStop(0, 'rgba(255,250,232,.95)'); m.addColorStop(.4, 'rgba(255,179,71,.5)'); m.addColorStop(1, 'rgba(255,110,30,0)');
+  c.strokeStyle = m; c.lineWidth = 2.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(1120, 60); c.lineTo(900, 150); c.stroke();
+  document.fonts.ready.then(() => document.body.dataset.ready = '1');
+</script>
+</body></html>

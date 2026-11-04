@@ -4,10 +4,10 @@
   "private": true,
   "description": "Executive portfolio and professional resume website for De'Aris Henry.",
   "scripts": {
-    "build:map": "node tools/build-map.mjs",
-    "build:signature": "node tools/build-signature.mjs",
-    "build:assets": "node tools/render-assets.mjs",
-    "build": "npm run build:map && npm run build:signature && npm run build:assets",
+    "assets": "npm run gen:map && npm run gen:signature && npm run gen:assets",
+    "gen:map": "node tools/build-map.mjs",
+    "gen:signature": "node tools/build-signature.mjs",
+    "gen:assets": "node tools/render-assets.mjs",
     "serve": "npx --yes http-server@14.1.1 . -p 8080 -c3600",
     "verify": "node tools/verify.mjs"
   },

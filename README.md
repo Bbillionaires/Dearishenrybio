@@ -31,13 +31,13 @@ All values that need verification live in `assets/js/site-config.js`:
 Venture, technology, and book **status labels** are set in `index.html` (`status--operating`,
 `status--development`, `status--concept`, `status--proposed`, `status--pending`).
 
-After you change contact details, rebuild the PDF so it includes them: `npm run build:assets`.
+After you change contact details, rebuild the PDF so it includes them: `npm run gen:assets`.
 
 ## Commands
 
 ```bash
 npm install            # dev-only deps for the map generator
-npm run build          # regenerate map, signature, coin PNG/WebP, icons, OG image, PDF
+npm run assets         # regenerate map, signature, coin PNG/WebP, icons, OG image, PDF
 npm run serve          # http://localhost:8080 (normal caching, max-age 3600)
 npm run verify         # end-to-end checks (run while `serve` is running)
 ```

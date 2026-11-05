@@ -115,6 +115,7 @@ try {
     posted = { url: route.request().url(), body: JSON.parse(route.request().postData() || '{}') };
     await route.fulfill({ status: 200, contentType: 'application/json', body: '{"success":"true"}' });
   });
+  await page.evaluate(() => { document.getElementById('form-status').className = 'form-status'; });
   await page.fill('#cf-name', 'Test Person');
   await page.fill('#cf-email', 'test@example.com');
   await page.selectOption('#cf-type', 'Investment');

@@ -6,7 +6,7 @@
 window.SITE_CONFIG = {
   contact: {
     // Inbox that receives contact-form requests.
-    email: 'henry@greenwood100inc.com',
+    email: 'dearishenry@gmail.com',
     // Show the email address publicly on the site and resume? (false = private)
     showEmail: false,
     phone: '',
@@ -16,7 +16,7 @@ window.SITE_CONFIG = {
     // The FIRST submission triggers a one-time activation email from FormSubmit to
     // that inbox — click "Activate Form" in it, then all later messages arrive.
     // Any Formspree-compatible JSON endpoint also works here.
-    formEndpoint: 'https://formsubmit.co/ajax/henry@greenwood100inc.com',
+    formEndpoint: 'https://formsubmit.co/ajax/dearishenry@gmail.com',
   },
 
 

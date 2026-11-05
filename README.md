@@ -21,7 +21,7 @@ serve it; the `tools/` scripts only regenerate assets.
 
 All values that need verification live in `assets/js/site-config.js`:
 
-- `contact.email`: the inbox that receives contact-form requests (currently henry@greenwood100inc.com).
+- `contact.email`: the inbox that receives contact-form requests (currently dearishenry@gmail.com).
 - `contact.showEmail`: `false` keeps the address off the page and resume; `true` displays it.
 - `contact.formEndpoint`: the form backend. It is set to FormSubmit, which forwards each
   submission to the inbox. **The first submission triggers a one-time activation email from
@@ -50,9 +50,8 @@ pen strokes with a broad-nib width model), `tools/build-map.mjs` (Natural Earth 
 ## Deploying
 
 Upload the repository root to any static host (Vercel, Netlify, GitHub Pages, Cloudflare Pages).
-Once the domain is known, change the `og:image` and `twitter:image` URLs in `index.html` to absolute
-URLs (`https://your-domain/assets/img/og-image.jpg`) and add a `<link rel="canonical">` tag, so
-social previews resolve.
+The site is configured for **https://dearishenry.com** (canonical URL, social preview images,
+`sitemap.xml`). If the domain changes, search the repo for `dearishenry.com`.
 
 ## Animation behavior
 

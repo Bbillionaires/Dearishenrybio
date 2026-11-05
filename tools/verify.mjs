@@ -110,6 +110,7 @@ try {
   const invalid = await page.evaluate(() => [...document.querySelectorAll('#contact-form [aria-invalid="true"]')].map((e) => e.name));
   check('contact form validates required fields', ['name', 'email', 'type', 'message'].every((n) => invalid.includes(n)), invalid.join(','));
   // Never send real email from tests: intercept the form backend.
+  const cfgEmail = await page.evaluate(() => window.SITE_CONFIG.contact.email);
   let posted = null;
   await page.route(/formsubmit\.co|formspree\.io/, async (route) => {
     posted = { url: route.request().url(), body: JSON.parse(route.request().postData() || '{}') };
@@ -123,8 +124,8 @@ try {
   await page.locator('#contact-form button[type=submit]').click();
   await page.waitForFunction(() => /is-(success|error)/.test(document.getElementById('form-status').className));
   const status2 = await page.evaluate(() => document.getElementById('form-status').className);
-  check('contact form posts to the configured inbox endpoint', posted && /henry@greenwood100inc\.com/.test(posted.url) && posted.body.opportunityType === 'Investment' && /is-success/.test(status2), JSON.stringify(posted));
-  const emailShown = await page.evaluate(() => document.body.innerText.includes('henry@greenwood100inc.com'));
+  check('contact form posts to the configured inbox endpoint', posted && posted.url.includes(cfgEmail) && posted.body.opportunityType === 'Investment' && /is-success/.test(status2), JSON.stringify(posted));
+  const emailShown = await page.evaluate(() => document.body.innerText.includes(window.SITE_CONFIG.contact.email));
   check('private inbox address not displayed on page', !emailShown);
   const opts = await page.$$eval('#cf-type option', (o) => o.map((x) => x.textContent).slice(1).join('|'));
   check('opportunity types', opts === 'Employment|Recruiting|Business Partnership|Real Estate|Investment|Technology|Film Production|Other', opts);

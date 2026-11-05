@@ -48,6 +48,9 @@
     this.resizeQueued = false;
     this.listening = false;
     this.spawned = { ltr: 0, rtl: 0 };
+    this.inView = true;
+    this.ro = null;
+    this.io = null;
   }
 
   Sky.prototype.mount = function () {
@@ -64,6 +67,7 @@
       if (!this.ctx) return;
       this.buildSprite();
       this.resize(true);
+      this.observe();
     }
     this.listen();
     this.start();
@@ -80,8 +84,25 @@
     else if (mqReduce.addListener) mqReduce.addListener(this.onMotionPref);
   };
 
+  // Size to the canvas's container (the hero) and pause while it is off-screen.
+  Sky.prototype.observe = function () {
+    var self = this, host = this.canvas.parentElement;
+    if (this.ro) this.ro.disconnect();
+    if (this.io) this.io.disconnect();
+    if (window.ResizeObserver && host) { this.ro = new ResizeObserver(function () { self.onResize(); }); this.ro.observe(host); }
+    if (window.IntersectionObserver && host) {
+      this.io = new IntersectionObserver(function (en) {
+        self.inView = en[en.length - 1].isIntersecting;
+        if (self.inView) self.start(); else self.stop();
+      });
+      this.io.observe(host);
+    }
+  };
+
   Sky.prototype.destroy = function () {
     this.stop();
+    if (this.ro) this.ro.disconnect();
+    if (this.io) this.io.disconnect();
     window.removeEventListener('resize', this.onResize);
     document.removeEventListener('visibilitychange', this.onVisibility);
     window.removeEventListener('pageshow', this.onPageShow);
@@ -100,7 +121,9 @@
   };
 
   Sky.prototype.resize = function (force) {
-    var w = window.innerWidth, h = window.innerHeight;
+    var host = this.canvas.parentElement === document.body ? null : this.canvas.parentElement;
+    var w = host ? host.clientWidth : window.innerWidth, h = host ? host.clientHeight : window.innerHeight;
+    if (!w || !h) return;
     var small = this.isSmall();
     var dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
     // Ignore mobile URL-bar height jitter unless the change is significant.
@@ -375,7 +398,7 @@
   Sky.prototype.start = function () {
     if (!this.ctx) return;
     if (this.reduced) { this.stop(); this.draw(0); return; } // static sky, no loop
-    if (this.running || document.hidden) return;
+    if (this.running || document.hidden || !this.inView) return;
     this.running = true;
     this.last = 0;
     this.raf = requestAnimationFrame(this.frame);
@@ -409,7 +432,7 @@
   };
 
   Sky.prototype.state = function () {
-    return { running: this.running, reduced: this.reduced, stars: this.stars.length, meteors: this.meteors.length, spawned: { ltr: this.spawned.ltr, rtl: this.spawned.rtl }, time: this.time };
+    return { inView: this.inView, running: this.running, reduced: this.reduced, stars: this.stars.length, meteors: this.meteors.length, spawned: { ltr: this.spawned.ltr, rtl: this.spawned.rtl }, time: this.time };
   };
 
   var api = window.Starfield = window.Starfield || {};

@@ -109,13 +109,22 @@ try {
   await page.locator('#contact-form button[type=submit]').click();
   const invalid = await page.evaluate(() => [...document.querySelectorAll('#contact-form [aria-invalid="true"]')].map((e) => e.name));
   check('contact form validates required fields', ['name', 'email', 'type', 'message'].every((n) => invalid.includes(n)), invalid.join(','));
+  // Never send real email from tests: intercept the form backend.
+  let posted = null;
+  await page.route(/formsubmit\.co|formspree\.io/, async (route) => {
+    posted = { url: route.request().url(), body: JSON.parse(route.request().postData() || '{}') };
+    await route.fulfill({ status: 200, contentType: 'application/json', body: '{"success":"true"}' });
+  });
   await page.fill('#cf-name', 'Test Person');
   await page.fill('#cf-email', 'test@example.com');
   await page.selectOption('#cf-type', 'Investment');
   await page.fill('#cf-message', 'Interested in discussing a partnership.');
   await page.locator('#contact-form button[type=submit]').click();
-  const status = await page.evaluate(() => document.getElementById('form-status').className);
-  check('contact form submits when valid', /is-(success|info)/.test(status), status);
+  await page.waitForFunction(() => /is-(success|error)/.test(document.getElementById('form-status').className));
+  const status2 = await page.evaluate(() => document.getElementById('form-status').className);
+  check('contact form posts to the configured inbox endpoint', posted && /henry@greenwood100inc\.com/.test(posted.url) && posted.body.opportunityType === 'Investment' && /is-success/.test(status2), JSON.stringify(posted));
+  const emailShown = await page.evaluate(() => document.body.innerText.includes('henry@greenwood100inc.com'));
+  check('private inbox address not displayed on page', !emailShown);
   const opts = await page.$$eval('#cf-type option', (o) => o.map((x) => x.textContent).slice(1).join('|'));
   check('opportunity types', opts === 'Employment|Recruiting|Business Partnership|Real Estate|Investment|Technology|Film Production|Other', opts);
 
@@ -129,7 +138,16 @@ try {
   const text = await page.evaluate(() => document.body.innerText);
   check('illustrative scope labeled', /illustrative scope value,? not verified collected revenue/i.test(text) || /Illustrative scope value — not verified collected revenue/i.test(text));
   check('$10,080 shown', text.includes('$10,080'));
-  check('no "gross sales" claim of $145,000 as realized', !/\$145,000[^.]*(realized|closed) (gross )?sales/i.test(text.replace(/not closed gross sales/gi, '')));
+  check('real estate: 55+ homes, ≈$2.5M estimated, no deal boxes', text.includes('55+') && /\$2\.5M/.test(text) && !/Lorenzo Court|\$315,000|\$145,000/.test(text));
+  check('film: Backwoods Blood Feud produced + POON coming soon + IMDb link', /Backwoods Blood Feud/.test(text) && /Coming Soon/i.test(text) && await page.locator('a[href="https://www.imdb.com/name/nm15804821/"]').count() > 0);
+  check('Greenwood 100 nonprofit mission shown', /Greenwood 100 Inc\./.test(text) && /community development, education, and job growth/.test(text));
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
+  await page.waitForTimeout(400);
+  const offscreen = await page.evaluate(() => window.Starfield.instance.state());
+  check('starfield pauses when hero scrolled out of view', !offscreen.running && !offscreen.inView, JSON.stringify(offscreen));
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(400);
+  check('starfield resumes when hero back in view', await page.evaluate(() => window.Starfield.instance.state().running));
   check('footer copyright', text.includes("© 2026 De'Aris Henry. All Rights Reserved."));
   check('signature is the last footer element', await page.evaluate(() => !!document.querySelector('.site-footer .signature')));
 

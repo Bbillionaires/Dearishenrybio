@@ -1,6 +1,7 @@
 # De'Aris Henry — Executive Portfolio & Professional Resume
 
-A static, dependency-free website (HTML/CSS/vanilla JS). No build step is needed to
+A static, dependency-free website (HTML/CSS/vanilla JS). Light, spacious pages framed by a dark
+starfield hero and a dark signature footer. No build step is needed to
 serve it; the `tools/` scripts only regenerate assets.
 
 ## Structure
@@ -20,12 +21,13 @@ serve it; the `tools/` scripts only regenerate assets.
 
 All values that need verification live in `assets/js/site-config.js`:
 
-- `contact.email`, `contact.phone`, `contact.linkedin`: shown on the site and resume only when filled in.
-- `contact.formEndpoint`: a form backend URL (Formspree-compatible JSON POST). Without one, the
-  form opens the visitor's email app addressed to `contact.email`. The form also carries Netlify
-  Forms attributes, so on Netlify it can post natively.
-- `verifiedRecords`: verified closed transactions, actual gross sales, realized returns. Empty
-  values display "Pending verification". Proposed scenarios are never summed into these.
+- `contact.email`: the inbox that receives contact-form requests (currently henry@greenwood100inc.com).
+- `contact.showEmail`: `false` keeps the address off the page and resume; `true` displays it.
+- `contact.formEndpoint`: the form backend. It is set to FormSubmit, which forwards each
+  submission to the inbox. **The first submission triggers a one-time activation email from
+  FormSubmit; click "Activate Form" in it.** Messages arrive after that. Any Formspree-compatible JSON
+  endpoint also works.
+- `contact.imdb`, `contact.linkedin`, `contact.phone`: shown when filled in.
 - `bookLinks`: verified purchase links per book.
 
 Venture, technology, and book **status labels** are set in `index.html` (`status--operating`,
@@ -53,6 +55,8 @@ URLs (`https://your-domain/assets/img/og-image.jpg`) and add a `<link rel="canon
 social previews resolve.
 
 ## Animation behavior
+
+- The starfield lives in the hero banner and pauses while the hero is scrolled out of view.
 
 - The starfield starts on every visit. It pauses while the tab is hidden and resumes when the tab is
   visible again, and it restarts after a back/forward-cache restore (`pageshow`). It uses no storage flags.

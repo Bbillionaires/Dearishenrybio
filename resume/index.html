@@ -83,13 +83,10 @@
 
   <h2>Real Estate Investment &amp; Transactions</h2>
   <ul>
-    <li>Lorenzo Court, Jacksonville: structured a land lease at $450/month ($5,400 annualized scheduled rent).</li>
-    <li>Seller-financed property scenario: proposed $25,000 transaction with installment terms.</li>
-    <li>Residential lease-option scenario: proposed $120,000 transaction with a $1,300/month rental component.</li>
-    <li>Commercial land development scenario: proposed approximately $315,000 in ten-year base rent, with alternative concepts including monthly rent, revenue participation, and potential equity.</li>
-    <li>Evaluated property debt, loan-to-value, and investment structures.</li>
+    <li>Sold more than 55 homes, an estimated $2.5M in total sales.</li>
+    <li>Structured seller financing, lease options, land leases, and commercial land development proposals with revenue-participation concepts.</li>
+    <li>Evaluated residential investments, property debt, loan-to-value, and investment structures.</li>
   </ul>
-  <p class="fine">Proposed and scheduled values are not closed sales or realized returns.</p>
 
   <h2>Maritime Experience</h2>
   <h3>Merchant Marine — International Shipping</h3>
@@ -112,7 +109,7 @@
     <li>One United Enterprise LLC; One United Property Services — commercial business development, property maintenance, and contracting (operating).</li>
     <li>New Jerusalem Transitional Housing LLC — housing initiatives, leasing, and property utilization.</li>
     <li>Mortgage Owl LLC — mortgage marketing and financial services business development.</li>
-    <li>Greenwood 100 Inc. — nonprofit youth and community support, volunteer and partnership initiatives, international liaison involvement.</li>
+    <li>Greenwood 100 Inc. — nonprofit for community development, education, and job growth.</li>
     <li>Azoth International LLC / Azoth Studios — technology, digital media, and creative development.</li>
     <li>Concepts: VentureCape, Contractors Clearinghouse, Acquisitioneers; Help The Kids Win youth initiative.</li>
   </ul>
@@ -124,7 +121,8 @@
   <ul>
     <li><span class="label">Who's Driving My Car?</span> — personal development book (ISBN 9798172872020).</li>
     <li><span class="label">In development:</span> Chess in Real Life; The Spades System; VowDoo; real estate educational writing.</li>
-    <li><span class="label">POON</span> — original adult crime-drama screenplay explored as a feature film and episodic series (Azoth Studios, in development).</li>
+    <li><span class="label">Backwoods Blood Feud</span> (2025) — produced feature film; credits at imdb.com/name/nm15804821.</li>
+    <li><span class="label">POON</span> — original adult crime drama for film and episodic series (Azoth Studios, coming soon).</li>
   </ul>
 
   <h2>International Network</h2>
@@ -139,8 +137,9 @@
     var C = (window.SITE_CONFIG || {}).contact || {};
     var parts = ['Jacksonville, Florida'];
     if (C.phone) parts.push(C.phone);
-    if (C.email) parts.push(C.email);
+    if (C.email && C.showEmail) parts.push(C.email);
     if (C.linkedin) parts.push(C.linkedin.replace(/^https?:\/\/(www\.)?/, ''));
+    if (C.imdb) parts.push(C.imdb.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''));
     document.getElementById('contact-line').textContent = parts.join(' | ');
   })();
 </script>

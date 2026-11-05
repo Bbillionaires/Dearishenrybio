@@ -63,37 +63,6 @@
     reveals.forEach(function (el) { el.classList.add('is-visible'); });
   }
 
-  /* ---------- Verified records (Real Estate & Investments) ---------- */
-  (function renderRecords() {
-    var R = CFG.verifiedRecords || {};
-    var set = function (key, value) {
-      var dd = $('[data-record="' + key + '"]');
-      if (!dd) return;
-      if (value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && !value.length)) {
-        dd.textContent = value;
-        dd.classList.add('is-verified');
-      }
-    };
-    var tx = Array.isArray(R.closedTransactions) ? R.closedTransactions : [];
-    if (tx.length) {
-      set('closedTransactions', tx.length + ' verified');
-      var list = $('#verified-tx-list');
-      if (list) {
-        list.hidden = false;
-        tx.forEach(function (t) {
-          var li = document.createElement('li');
-          li.textContent = [t.label, t.type, t.date, t.amount != null ? money(t.amount) : ''].filter(Boolean).join(' · ');
-          list.appendChild(li);
-        });
-      }
-    }
-    if (typeof R.actualGrossSales === 'number') set('actualGrossSales', money(R.actualGrossSales));
-    if (R.realizedReturns) set('realizedReturns', String(R.realizedReturns));
-    if (typeof R.investedCapital === 'number') set('investedCapital', money(R.investedCapital));
-    var asOf = $('[data-record-asof]');
-    if (asOf && R.asOf) asOf.textContent = 'Verified as of ' + R.asOf + '.';
-  })();
-
   /* ---------- Verified book links ---------- */
   (function bookLinks() {
     var L = CFG.bookLinks || {};
@@ -109,25 +78,21 @@
     });
   })();
 
-  /* ---------- Contact links ---------- */
+  /* ---------- Contact links (email only when public) ---------- */
   (function contactLinks() {
     var C = CFG.contact || {};
     var ul = $('#contact-links');
     if (!ul) return;
     var items = [];
-    if (C.email) items.push(['mailto:' + C.email, 'Email', C.email]);
-    if (C.phone) items.push(['tel:' + C.phone.replace(/[^\d+]/g, ''), 'Phone', C.phone]);
-    if (C.linkedin && /^https:\/\//.test(C.linkedin)) items.push([C.linkedin, 'LinkedIn', 'View profile']);
+    if (C.email && C.showEmail) items.push(['mailto:' + C.email, C.email]);
+    if (C.phone) items.push(['tel:' + C.phone.replace(/[^\d+]/g, ''), C.phone]);
+    if (C.linkedin && /^https:\/\//.test(C.linkedin)) items.push([C.linkedin, 'LinkedIn profile']);
     items.forEach(function (it) {
       var li = document.createElement('li'), a = document.createElement('a');
-      a.href = it[0];
-      if (it[1] === 'LinkedIn') { a.target = '_blank'; a.rel = 'noopener'; }
-      a.innerHTML = '<strong></strong><span class="muted"></span>';
-      a.firstChild.textContent = it[1] + ':';
-      a.lastChild.textContent = it[2];
+      a.href = it[0]; a.textContent = it[1];
+      if (/^https/.test(it[0])) { a.target = '_blank'; a.rel = 'noopener'; }
       li.appendChild(a); ul.appendChild(li);
     });
-    ul.hidden = !items.length;
   })();
 
   /* ---------- Contact form ---------- */
@@ -180,13 +145,16 @@
         fetch(C.formEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(Object.assign({ _subject: 'Website inquiry — ' + data.opportunityType }, data)),
+          body: JSON.stringify(Object.assign({ _subject: 'Website inquiry — ' + data.opportunityType, _template: 'table', _captcha: 'false', _replyto: data.email }, data)),
         }).then(function (r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json().catch(function () { return {}; });
+        }).then(function (res) {
+          if (res && (res.success === false || res.success === 'false')) throw new Error(res.message || 'rejected');
           form.reset();
           show('success', 'Thank you, ' + data.name.split(' ')[0] + '. Your message has been sent — I will be in touch.');
         }).catch(function () {
-          show('error', 'Your message could not be sent right now. Please try again shortly' + (C.email ? ' or email ' + C.email + '.' : '.'));
+          show('error', 'Your message could not be sent right now. Please try again shortly' + (C.email && C.showEmail ? ' or email ' + C.email + '.' : '.'));
         }).then(function () { btn.disabled = false; btn.textContent = 'Send Message'; });
         return;
       }

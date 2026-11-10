@@ -17,64 +17,83 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
   page.on('requestfailed', (r) => errors.push('request failed: ' + r.url()));
-  await page.goto(BASE, { waitUntil: 'networkidle' });
-  await page.waitForTimeout(500);
+  const vstate = (pg) => pg.evaluate(() => ({
+    active: document.documentElement.classList.contains('vault-active'),
+    state: window.__vault && window.__vault.state(),
+    angle: window.__vault && window.__vault.angle ? window.__vault.angle() : null,
+    inert: !!document.querySelector('.page').inert,
+    hidden: document.getElementById('vault-intro').hidden,
+  }));
+  const waitOpen = (pg, ms = 9000) => pg.waitForFunction(() => window.__vault && window.__vault.state() === 'open', null, { timeout: ms }).then(() => true, () => false);
 
-  const s0 = await page.evaluate(() => window.Starfield.instance.state());
-  check('starfield running on load', s0.running && !s0.reduced, JSON.stringify(s0));
-  check('hundreds of stars', s0.stars >= 180, s0.stars + ' stars');
+  await page.goto(BASE, { waitUntil: 'load' });
+  await page.waitForTimeout(300);
+  const v0 = await vstate(page);
+  const focused = await page.evaluate(() => document.activeElement && document.activeElement.classList.contains('vault-wheel'));
+  check('vault door shown on load; page behind is inert; wheel focused', v0.active && v0.state === 'locked' && v0.inert && !v0.hidden && focused, JSON.stringify(v0));
 
-  // run long enough to see meteors in both directions
-  let st;
-  for (let i = 0; i < 40; i++) {
-    await page.waitForTimeout(1000);
-    st = await page.evaluate(() => window.Starfield.instance.state());
-    if (st.spawned.ltr > 0 && st.spawned.rtl > 0) break;
-  }
-  check('meteors travel left→right and right→left', st.spawned.ltr > 0 && st.spawned.rtl > 0, JSON.stringify(st.spawned));
+  // drag the wheel: clockwise is resisted, counter-clockwise turns and opens
+  const box = await page.locator('.vault-wheel').boundingBox();
+  const cx = box.x + box.width / 2, cy = box.y + box.height / 2, R = box.width * 0.38;
+  const at = (deg) => [cx + R * Math.cos(deg * Math.PI / 180), cy + R * Math.sin(deg * Math.PI / 180)];
+  await page.mouse.move(...at(0));
+  await page.mouse.down();
+  for (let d = 10; d <= 60; d += 10) await page.mouse.move(...at(d)); // clockwise on screen
+  const cw = (await vstate(page)).angle;
+  for (let d = 50; d >= -330; d -= 10) await page.mouse.move(...at(d)); // counter-clockwise
+  await page.mouse.up();
+  const v1 = await vstate(page);
+  check('wheel will not turn clockwise', cw === 0, String(cw));
+  check('dragging the wheel counter-clockwise starts opening', v1.state === 'opening' && v1.angle <= -270, JSON.stringify(v1));
+  const sawUnlock = await page.waitForSelector('#vault-intro.is-unlocked', { state: 'attached', timeout: 5000 }).then(() => true, () => false);
+  const sawOpen = await page.waitForSelector('#vault-intro.is-open', { state: 'attached', timeout: 5000 }).then(() => true, () => false);
+  const opened = await waitOpen(page);
+  const v2 = await vstate(page);
+  check('bolts retract, door swings open', sawUnlock && sawOpen);
+  check('wheel finished turning counter-clockwise', v2.angle === -450, String(v2.angle));
+  check('enters the vault: door removed, page interactive', opened && !v2.active && v2.hidden && !v2.inert, JSON.stringify(v2));
+  const heroBg = await page.evaluate(() => getComputedStyle(document.querySelector('.hero'), '::before').backgroundImage);
+  check('hero sits inside the vault (vault-interior background)', /vault-interior/.test(heroBg), heroBg.slice(0, 80));
 
-  // tab visibility: hidden stops the loop, visible resumes it
-  await page.evaluate(() => {
-    Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  const hidden = await page.evaluate(() => window.Starfield.instance.state().running);
-  await page.evaluate(() => {
-    Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  const t1 = await page.evaluate(() => window.Starfield.instance.state().time);
-  await page.waitForTimeout(600);
-  const vis = await page.evaluate(() => window.Starfield.instance.state());
-  check('pauses when tab hidden, resumes when visible', !hidden && vis.running && vis.time > t1, `hidden.running=${hidden} resumed.running=${vis.running}`);
+  // every visit, no storage flags; opens on its own if untouched
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  const r0 = await vstate(page);
+  const auto = await waitOpen(page, 9000);
+  const store = await page.evaluate(() => localStorage.length + sessionStorage.length);
+  check('plays again after refresh, opens on its own, no storage flags', r0.state === 'locked' && auto && store === 0, JSON.stringify(r0));
 
-  // bfcache restore: pagehide then pageshow(persisted)
-  await page.evaluate(() => {
-    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
-  });
-  const afterHide = await page.evaluate(() => window.Starfield.instance.state().running);
-  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
-  const t2 = await page.evaluate(() => window.Starfield.instance.state().time);
-  await page.waitForTimeout(600);
-  const bf = await page.evaluate(() => window.Starfield.instance.state());
-  check('restarts on back/forward cache pageshow', !afterHide && bf.running && bf.time > t2);
+  // keyboard: Enter on the focused wheel
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Enter');
+  const kb = (await vstate(page)).state;
+  check('keyboard (Enter) turns the wheel', kb === 'opening', kb);
+  await waitOpen(page);
 
-  // real navigation away and back (bfcache in Chromium where eligible)
+  // skip intro
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  await page.click('[data-vault-skip]');
+  check('"Skip intro" goes straight in', await waitOpen(page, 1500));
+
+  // deep links skip the door
+  await page.goto(BASE + '#contact', { waitUntil: 'load' });
+  await page.waitForTimeout(200);
+  const dl = await vstate(page);
+  check('deep link (#contact) skips the vault', !dl.active && dl.hidden && !dl.inert, JSON.stringify(dl));
+
+  // history back from another page never leaves the door half-open
+  await page.goto(BASE, { waitUntil: 'load' });
+  await page.evaluate(() => window.__vault.skip());
+  await waitOpen(page, 1500);
   await page.goto(BASE + 'resume/', { waitUntil: 'load' });
   await page.goBack({ waitUntil: 'load' });
-  await page.waitForTimeout(800);
-  const back = await page.evaluate(() => window.Starfield.instance.state());
-  check('animating after history back navigation', back.running && back.time > 0.3, JSON.stringify(back));
-
-  // reload → starts again (no one-time storage flags)
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(500);
-  const rl = await page.evaluate(() => ({ s: window.Starfield.instance.state(), ls: localStorage.length, ss: sessionStorage.length }));
-  check('restarts after refresh, no storage flags', rl.s.running && rl.ls === 0 && rl.ss === 0, JSON.stringify(rl));
-
-  // idempotent re-init (client-side navigation scenario)
-  const re = await page.evaluate(() => { const a = window.Starfield.instance; window.Starfield.init(); return a === window.Starfield.instance && a.state().running; });
-  check('re-init reuses running instance', re);
+  await page.waitForTimeout(300);
+  const hb = (await vstate(page)).state;
+  check('after history back the vault is open or freshly locked', hb === 'open' || hb === 'locked', hb);
+  if (hb !== 'open') { await page.evaluate(() => window.__vault.skip()); await waitOpen(page, 1500); }
+  await page.waitForLoadState('networkidle');
 
   // coin
   const coin = await page.evaluate(() => {
@@ -143,13 +162,6 @@ try {
   check('real estate: 55+ homes, ≈$2.5M estimated, no deal boxes', text.includes('55+') && /\$2\.5M/.test(text) && !/Lorenzo Court|\$315,000|\$145,000/.test(text));
   check('film: Backwoods Blood Feud produced + POON coming soon + IMDb link', /Backwoods Blood Feud/.test(text) && /Coming Soon/i.test(text) && await page.locator('a[href="https://www.imdb.com/name/nm15804821/"]').count() > 0);
   check('Greenwood 100 nonprofit mission shown', /Greenwood 100 Inc\./.test(text) && /community development, education, and job growth/.test(text));
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
-  await page.waitForTimeout(400);
-  const offscreen = await page.evaluate(() => window.Starfield.instance.state());
-  check('starfield pauses when hero scrolled out of view', !offscreen.running && !offscreen.inView, JSON.stringify(offscreen));
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.waitForTimeout(400);
-  check('starfield resumes when hero back in view', await page.evaluate(() => window.Starfield.instance.state().running));
   check('footer copyright', text.includes("© 2026 De'Aris Henry. All Rights Reserved."));
   check('signature is the last footer element', await page.evaluate(() => !!document.querySelector('.site-footer .signature')));
 
@@ -159,19 +171,22 @@ try {
   const rctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
   const rp = await rctx.newPage();
   await rp.goto(BASE, { waitUntil: 'networkidle' });
-  await rp.waitForTimeout(1500);
-  const rs = await rp.evaluate(() => ({ s: window.Starfield.instance.state(), coin: getComputedStyle(document.querySelector('.coin')).animationName }));
-  check('reduced motion: static sky, no meteors, coin still', rs.s.reduced && !rs.s.running && rs.s.meteors === 0 && rs.coin === 'none', JSON.stringify(rs));
+  await rp.waitForTimeout(500);
+  const rs = await rp.evaluate(() => ({ active: document.documentElement.classList.contains('vault-active'), hidden: document.getElementById('vault-intro').hidden, coin: getComputedStyle(document.querySelector('.coin')).animationName }));
+  check('reduced motion: no vault animation, coin still', !rs.active && rs.hidden && rs.coin === 'none', JSON.stringify(rs));
   await rctx.close();
 
   // mobile
   const mctx = await browser.newContext({ ...devices['iPhone 13'] });
   const mp = await mctx.newPage();
   await mp.goto(BASE, { waitUntil: 'networkidle' });
-  await mp.waitForTimeout(500);
-  const m = await mp.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: innerWidth, s: window.Starfield.instance.state() }));
+  await mp.waitForTimeout(300);
+  const door = await mp.evaluate(() => { const r = document.querySelector('.vault-frame').getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: innerWidth, h: innerHeight }; });
+  check('mobile: vault door fits the screen', door.l >= 0 && door.r <= door.w && door.t >= 0 && door.b <= door.h, JSON.stringify(door));
+  await mp.tap('.vault-wheel');
+  check('mobile: tapping the wheel opens the vault', await waitOpen(mp));
+  const m = await mp.evaluate(() => ({ sw: document.documentElement.scrollWidth, w: innerWidth }));
   check('mobile: no horizontal scroll', m.sw <= m.w, `${m.sw} vs ${m.w}`);
-  check('mobile: starfield scaled down', m.s.running && m.s.stars <= 320, String(m.s.stars));
   await mp.click('.nav-toggle');
   const open = await mp.evaluate(() => document.getElementById('site-nav').classList.contains('is-open'));
   await mp.keyboard.press('Escape');
@@ -180,7 +195,7 @@ try {
   await mctx.close();
 
   // static assets
-  for (const f of ['resume/DeAris-Henry-Resume.pdf', 'assets/img/dh-coin-front.webp', 'assets/img/dh-coin-back.webp', 'assets/img/og-image.jpg', 'assets/img/world-map.svg']) {
+  for (const f of ['resume/DeAris-Henry-Resume.pdf', 'assets/img/dh-coin-front.webp', 'assets/img/dh-coin-back.webp', 'assets/img/vault-interior.webp', 'assets/img/vault-interior.jpg', 'assets/img/og-image.jpg', 'assets/img/world-map.svg']) {
     check('asset exists: ' + f, existsSync(new URL('../' + f, import.meta.url)));
   }
 } finally {

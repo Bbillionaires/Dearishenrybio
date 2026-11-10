@@ -1,7 +1,7 @@
 /* ==========================================================================
    De'Aris Henry — Executive Portfolio
-   Light, spacious executive pages framed by a cinematic dark hero (starfield
-   + rotating DH coin) and a dark signature footer. Metallic gold accents.
+   Light, spacious executive pages framed by a cinematic dark hero (bank-vault
+   interior + rotating DH coin) and a dark signature footer. Metallic gold accents.
    Theme tokens: light by default; `.theme-dark` re-scopes them for dark areas.
    ========================================================================== */
 
@@ -259,14 +259,13 @@ p { margin: 0 0 1em; }
 .site-nav .nav-resume { display: none; }
 @media (max-width: 860px) { .site-nav .nav-resume { display: block; margin-top: 14px; } .site-nav .nav-resume a { border: 0; color: #1a1305; } }
 
-/* ---------- Hero (dark, with starfield) ---------- */
+/* ---------- Hero (dark; inside the vault — see vault.css) ---------- */
 .hero {
   padding: clamp(40px, 6vw, 76px) 0 clamp(60px, 8vw, 100px); text-align: center;
   position: relative; overflow: hidden; isolation: isolate;
   background: radial-gradient(ellipse at 50% -10%, #0e1a33 0%, #030712 65%);
 }
 .hero > .container { position: relative; z-index: 1; }
-#starfield { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; display: block; }
 .hero h1 {
   font-size: clamp(2.3rem, 7vw, 5rem); font-weight: 700; letter-spacing: .1em; margin: 18px 0 14px;
   text-shadow: 0 0 40px rgba(212, 175, 55, .18);
@@ -536,7 +535,7 @@ tfoot .label-tag { display: block; font: 600 .7rem/1.3 var(--font-body); letter-
 
 /* ---------- Print (site) ---------- */
 @media print {
-  #starfield, .site-header, .coin-stage, .contact-grid form, .map-wrap { display: none !important; }
+  .vault-intro, .site-header, .coin-stage, .contact-grid form, .map-wrap { display: none !important; }
   .hero, .site-footer { background: #fff; }
   .panel, .card, .case { box-shadow: none; }
 }

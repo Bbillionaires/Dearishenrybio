@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- Source artwork for the vault interior behind the hero. Rendered to WebP/JPG by
+     tools/render-assets.mjs. One-point perspective: back wall + two side walls of
+     safe-deposit boxes, coffered ceiling lights, polished floor with gold inlay. -->
+<style>html,body{margin:0;background:#05070d}svg{display:block}</style>
+</head>
+<body>
+<svg id="v" xmlns="http://www.w3.org/2000/svg" width="2400" height="1350" viewBox="0 0 2400 1350"></svg>
+<script>
+const W = 2400, H = 1350, VX = 1200, VY = 560;
+const S_BACK = 0.4167;                 // screen scale of the back wall
+const TOP0 = 110, BOT0 = 1240;         // wall top/bottom on the front plane
+const proj = (x0, y0, s) => [VX + (x0 - VX) * s, VY + (y0 - VY) * s];
+const f = (n) => n.toFixed(1);
+const out = [];
+
+out.push(`<defs>
+  <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#6b5424"/><stop offset=".45" stop-color="#3f3216"/><stop offset="1" stop-color="#241c0c"/>
+  </linearGradient>
+  <linearGradient id="boxSide" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#2a2110"/><stop offset="1" stop-color="#4c3c19"/>
+  </linearGradient>
+  <linearGradient id="boxSideR" x1="1" y1="0" x2="0" y2="0">
+    <stop offset="0" stop-color="#2a2110"/><stop offset="1" stop-color="#4c3c19"/>
+  </linearGradient>
+  <linearGradient id="ceil" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#07090f"/><stop offset="1" stop-color="#151a25"/></linearGradient>
+  <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a1710"/><stop offset=".35" stop-color="#0c0b08"/><stop offset="1" stop-color="#030303"/></linearGradient>
+  <radialGradient id="pool" cx="50%" cy="0%" r="70%"><stop offset="0" stop-color="#ffd98a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+  <radialGradient id="glow" cx="50%" cy="38%" r="60%"><stop offset="0" stop-color="#ffe7b0" stop-opacity=".30"/><stop offset=".5" stop-color="#d4af37" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <radialGradient id="vig" cx="50%" cy="45%" r="75%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient>
+  <linearGradient id="lamp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6dc"/><stop offset="1" stop-color="#ffd37a"/></linearGradient>
+  <filter id="soft"><feGaussianBlur stdDeviation="10"/></filter>
+</defs>`);
+
+// --- ceiling, floor, walls base ---------------------------------------------
+const bTL = proj(0, TOP0, S_BACK), bBL = proj(0, BOT0, S_BACK);
+const bTR = proj(W, TOP0, S_BACK), bBR = proj(W, BOT0, S_BACK);
+out.push(`<rect width="${W}" height="${H}" fill="#05070d"/>`);
+out.push(`<polygon points="0,0 ${W},0 ${W},${TOP0} ${f(bTR[0])},${f(bTR[1])} ${f(bTL[0])},${f(bTL[1])} 0,${TOP0}" fill="url(#ceil)"/>`);
+out.push(`<polygon points="0,${BOT0} ${f(bBL[0])},${f(bBL[1])} ${f(bBR[0])},${f(bBR[1])} ${W},${BOT0} ${W},${H} 0,${H}" fill="url(#floor)"/>`);
+
+// ceiling light panels (3 rows receding)
+for (let r = 0; r < 4; r++) {
+  const z0 = r * 0.34 + 0.08, z1 = z0 + 0.16;
+  const s0 = 1 / (1 + z0), s1 = 1 / (1 + z1);
+  for (const cx of [W * 0.33, W * 0.67]) {
+    const a = proj(cx - 230, TOP0 - 4, s0), b = proj(cx + 230, TOP0 - 4, s0), c = proj(cx + 230, TOP0 - 4, s1), d = proj(cx - 230, TOP0 - 4, s1);
+    out.push(`<polygon points="${[a, b, c, d].map((p) => p.map(f).join(',')).join(' ')}" fill="url(#lamp)" opacity="${0.9 - r * 0.15}"/>`);
+  }
+}
+
+// floor inlay lines converging to vanishing point
+let inlay = '';
+for (let i = -6; i <= 6; i++) {
+  const x0 = VX + i * 260;
+  const a = proj(x0, H + 400, 1), b = proj(x0, H + 400, 0.42);
+  inlay += `M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`;
+}
+for (let k = 0; k < 6; k++) {
+  const s = 1 / (1 + k * 0.28);
+  const a = proj(-2000, BOT0 + 10, s), b = proj(W + 2000, BOT0 + 10, s);
+  inlay += `M${f(a[0])} ${f(a[1])}L${f(b[0])} ${f(b[1])}`;
+}
+out.push(`<path d="${inlay}" stroke="#d4af37" stroke-opacity=".22" stroke-width="2" fill="none"/>`);
+out.push(`<polygon points="0,${BOT0} ${f(bBL[0])},${f(bBL[1])} ${f(bBR[0])},${f(bBR[1])} ${W},${BOT0} ${W},${H} 0,${H}" fill="url(#pool)"/>`);
+
+// --- safe-deposit box (flat, back wall) -----------------------------------------
+function flatBox(x, y, w, h) {
+  const g = 3;
+  let s = `<rect x="${f(x + g)}" y="${f(y + g)}" width="${f(w - 2 * g)}" height="${f(h - 2 * g)}" rx="2" fill="url(#box)" stroke="#8a6a1f" stroke-opacity=".55" stroke-width="1"/>`;
+  s += `<rect x="${f(x + g + 2)}" y="${f(y + g + 1.5)}" width="${f(w - 2 * g - 4)}" height="1.5" fill="#f3da8c" opacity=".35"/>`;
+  s += `<rect x="${f(x + w * 0.38)}" y="${f(y + h * 0.18)}" width="${f(w * 0.24)}" height="${f(h * 0.14)}" fill="#d9be78" opacity=".75"/>`;
+  s += `<circle cx="${f(x + w * 0.38)}" cy="${f(y + h * 0.6)}" r="${f(Math.min(w, h) * 0.07)}" fill="#0a0805"/>`;
+  s += `<circle cx="${f(x + w * 0.62)}" cy="${f(y + h * 0.6)}" r="${f(Math.min(w, h) * 0.07)}" fill="#0a0805"/>`;
+  return s;
+}
+// back wall
+const ROWS = 12;
+const bw = bTR[0] - bTL[0], bh = bBL[1] - bTL[1];
+const COLS = 22;
+out.push(`<rect x="${f(bTL[0])}" y="${f(bTL[1])}" width="${f(bw)}" height="${f(bh)}" fill="#120e06"/>`);
+let back = '';
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) back += flatBox(bTL[0] + (c * bw) / COLS, bTL[1] + (r * bh) / ROWS, bw / COLS, bh / ROWS);
+out.push(`<g>${back}</g>`);
+
+// --- side walls in perspective ------------------------------------------------
+function sideWall(side) {
+  const X0 = side === 'left' ? 0 : W;
+  const depthCols = 7, zBack = 1 / S_BACK - 1;
+  let s = '';
+  // base wall
+  const fTop = [X0, TOP0], fBot = [X0, BOT0];
+  const pts = [fTop, fBot, proj(X0, BOT0, S_BACK), proj(X0, TOP0, S_BACK)];
+  s += `<polygon points="${pts.map((p) => p.map(f).join(',')).join(' ')}" fill="#100c05"/>`;
+  for (let c = 0; c < depthCols; c++) {
+    const z0 = (c * zBack) / depthCols, z1 = ((c + 1) * zBack) / depthCols;
+    const s0 = 1 / (1 + z0), s1 = 1 / (1 + z1);
+    for (let r = 0; r < ROWS; r++) {
+      const y0 = TOP0 + ((BOT0 - TOP0) * r) / ROWS, y1 = TOP0 + ((BOT0 - TOP0) * (r + 1)) / ROWS;
+      const ins = 0.06; // inset fraction
+      const zi0 = z0 + (z1 - z0) * ins, zi1 = z1 - (z1 - z0) * ins;
+      const yi0 = y0 + (y1 - y0) * ins, yi1 = y1 - (y1 - y0) * ins;
+      const si0 = 1 / (1 + zi0), si1 = 1 / (1 + zi1);
+      const q = [proj(X0, yi0, si0), proj(X0, yi0, si1), proj(X0, yi1, si1), proj(X0, yi1, si0)];
+      s += `<polygon points="${q.map((p) => p.map(f).join(',')).join(' ')}" fill="url(#${side === 'left' ? 'boxSide' : 'boxSideR'})" stroke="#8a6a1f" stroke-opacity=".5" stroke-width="1.2"/>`;
+      // label plate + keyholes
+      const zm = (zi0 + zi1) / 2, sm = 1 / (1 + zm);
+      const ym = yi0 + (yi1 - yi0) * 0.6;
+      const kh = proj(X0, ym, sm), plate0 = proj(X0, yi0 + (yi1 - yi0) * 0.24, 1 / (1 + zm - (z1 - z0) * 0.1)), plate1 = proj(X0, yi0 + (yi1 - yi0) * 0.24, 1 / (1 + zm + (z1 - z0) * 0.1));
+      const r0 = (yi1 - yi0) * sm * 0.07;
+      s += `<circle cx="${f(kh[0])}" cy="${f(kh[1])}" r="${f(r0)}" fill="#0a0805"/>`;
+      s += `<line x1="${f(plate0[0])}" y1="${f(plate0[1])}" x2="${f(plate1[0])}" y2="${f(plate1[1])}" stroke="#d9be78" stroke-opacity=".6" stroke-width="${f(Math.max(1.2, (yi1 - yi0) * sm * 0.12))}"/>`;
+    }
+  }
+  return s;
+}
+out.push(`<g>${sideWall('left')}${sideWall('right')}</g>`);
+
+// gold trim along wall/ceiling and wall/floor edges
+const trim = (a, b) => `<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="#e6c778" stroke-width="5" stroke-opacity=".55"/>`;
+out.push(trim([0, TOP0], bTL), trim([W, TOP0], bTR), trim([0, BOT0], bBL), trim([W, BOT0], bBR), trim(bTL, bTR), trim(bBL, bBR), trim(bTL, bBL), trim(bTR, bBR));
+
+// warm light falling from the ceiling, and edge vignette
+out.push(`<ellipse cx="${VX}" cy="${TOP0 + 180}" rx="1100" ry="520" fill="url(#glow)"/>`);
+out.push(`<rect width="${W}" height="${H}" fill="url(#vig)"/>`);
+
+document.getElementById('v').innerHTML = out.join('');
+document.body.dataset.ready = '1';
+</script>
+</body>
+</html>

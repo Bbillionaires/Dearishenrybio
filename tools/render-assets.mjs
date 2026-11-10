@@ -8,6 +8,7 @@ import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { rmSync } from 'node:fs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
@@ -42,6 +43,23 @@ for face in ('front', 'back'):
 `;
   execFileSync('python3', ['-I', '-c', py, path.join(root, 'assets/img')], { stdio: 'inherit' });
 
+  // --- vault interior (hero background) ---
+  const vp = await browser.newPage({ viewport: { width: 2400, height: 1350 } });
+  await vp.goto(url('tools/vault.html'));
+  await vp.waitForSelector('body[data-ready]');
+  await vp.screenshot({ path: img('vault-interior-master.png') });
+  await vp.close();
+  execFileSync('python3', ['-I', '-c', `
+import sys
+from PIL import Image
+d = sys.argv[1]
+m = Image.open(f'{d}/vault-interior-master.png').convert('RGB')
+m.resize((1920, 1080), Image.LANCZOS).save(f'{d}/vault-interior.webp', quality=80, method=6)
+m.resize((1920, 1080), Image.LANCZOS).save(f'{d}/vault-interior.jpg', quality=82, optimize=True, progressive=True)
+m.resize((960, 540), Image.LANCZOS).save(f'{d}/vault-interior-960.webp', quality=80, method=6)
+`, path.join(root, 'assets/img')], { stdio: 'inherit' });
+  rmSync(img('vault-interior-master.png'), { force: true });
+
   // --- OG image ---
   const og = await browser.newPage({ viewport: { width: 1200, height: 630 } });
   await og.goto(url('tools/og.html'));
@@ -60,6 +78,5 @@ for face in ('front', 'back'):
   await browser.close();
 }
 // remove masters
-import { rmSync } from 'node:fs';
 for (const f of ['front', 'back']) rmSync(img(`dh-coin-${f}-1024.png`), { force: true });
 console.log('assets rendered');

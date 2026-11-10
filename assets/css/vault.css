@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Vault entrance — full-screen steel vault door. The wheel turns
+   counter-clockwise, the locking bolts retract, the door swings open on its
+   hinge, and the view moves through the doorway into the vault (the hero).
+   Shown only while <html> has .vault-active (set in <head>, cleared by vault.js).
+   ========================================================================== */
+
+.vault-intro { display: none; }
+.vault-active, .vault-active body { overflow: hidden; }
+.vault-active .vault-intro {
+  --door: min(74vmin, 600px);
+  display: grid; place-items: center;
+  position: fixed; inset: 0; z-index: 200;
+  color: #e5e7eb; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(255, 226, 160, .10), transparent 55%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 1px, transparent 1px 240px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .02) 0 1px, transparent 1px 160px),
+    linear-gradient(180deg, #1a1d24 0%, #0e1015 55%, #07080b 100%);
+  transition: opacity .9s ease;
+}
+@media (max-width: 600px) { .vault-active .vault-intro { --door: min(78vw, 60vh); } }
+
+.vault-scene {
+  position: relative; width: calc(var(--door) * 1.16); aspect-ratio: 1;
+  display: grid; place-items: center;
+  transition: transform 1.1s cubic-bezier(.55, .05, .75, .3);
+  will-change: transform;
+}
+
+/* frame (the round opening in the vault wall) */
+.vault-frame {
+  position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 58%, rgba(0, 0, 0, .55) 59%, transparent 61%),
+    conic-gradient(from 210deg, #5f646c, #c9ced6, #6b7078, #3c4047, #a9aeb6, #5f646c);
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, .9), inset 0 0 0 3px rgba(230, 199, 120, .35), inset 0 0 40px rgba(0, 0, 0, .7);
+}
+.vault-frame::after { /* gold inlay ring */
+  content: ''; position: absolute; inset: 3.2%; border-radius: 50%;
+  border: 2px solid rgba(230, 199, 120, .55); box-shadow: 0 0 18px rgba(212, 175, 55, .2);
+}
+.vault-doorway {
+  position: absolute; width: var(--door); aspect-ratio: 1; border-radius: 50%; overflow: hidden;
+  background: #05070d image-set(url('../img/vault-interior-960.webp') type('image/webp'), url('../img/vault-interior.jpg') type('image/jpeg')) center / cover;
+  box-shadow: inset 0 0 60px 20px rgba(0, 0, 0, .85);
+}
+.vault-hinges { position: absolute; left: calc((100% - var(--door)) / 2 - var(--door) * .07); top: 50%; translate: 0 -50%; display: grid; gap: calc(var(--door) * .34); }
+.vault-hinges span {
+  display: block; width: calc(var(--door) * .1); height: calc(var(--door) * .16); border-radius: 12px;
+  background: linear-gradient(90deg, #4a4f57, #c3c8d0 45%, #6b7078 70%, #3a3e45);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .6), inset 0 0 0 1px rgba(255, 255, 255, .15);
+}
+
+/* the door — swings on its left edge */
+.vault-door-3d { position: absolute; width: var(--door); aspect-ratio: 1; perspective: calc(var(--door) * 3.2); }
+.vault-door {
+  --thick: calc(var(--door) * .09);
+  position: absolute; inset: 0; transform-style: preserve-3d; transform-origin: 0% 50%;
+  transition: transform 1.6s cubic-bezier(.55, .1, .25, 1);
+}
+.vault-door__edge {
+  position: absolute; inset: .6%; border-radius: 50%;
+  background: repeating-conic-gradient(#565b63 0 3deg, #9ba0a8 3deg 6deg);
+  transform: translateZ(var(--z));
+}
+.vault-door__back {
+  position: absolute; inset: .6%; border-radius: 50%; overflow: hidden;
+  transform: translateZ(calc(var(--thick) * -1)) rotateY(180deg);
+  background:
+    radial-gradient(circle at 60% 40%, rgba(255, 255, 255, .14), transparent 55%),
+    radial-gradient(circle, #3b4048 0 22%, #2a2e34 23% 24%, #4a4f57 25% 62%, #2a2e34 63% 64%, #3f444c 65%);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .7);
+}
+.vault-door__back i { /* locking bars */
+  position: absolute; left: 12%; right: 12%; height: 6%; border-radius: 6px;
+  background: linear-gradient(180deg, #c9ced6, #6d727a); box-shadow: 0 4px 10px rgba(0, 0, 0, .5);
+}
+.vault-door__back i:nth-child(1) { top: 28%; }
+.vault-door__back i:nth-child(2) { top: 47%; }
+.vault-door__back i:nth-child(3) { top: 66%; }
+.vault-door__face {
+  position: absolute; inset: 0; border-radius: 50%; overflow: visible;
+  transform: translateZ(0);
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .28), transparent 42%),
+    radial-gradient(circle at 70% 80%, rgba(0, 0, 0, .35), transparent 50%),
+    repeating-conic-gradient(from 0deg, #858b94 0deg 1.5deg, #a2a8b1 1.5deg 3deg, #7a8089 3deg 4.5deg);
+  box-shadow: inset 0 0 0 4px #3a3e45, inset 0 0 30px rgba(0, 0, 0, .55), 0 20px 50px rgba(0, 0, 0, .7);
+}
+.vault-door__art { position: absolute; inset: -6.67%; width: 113.34%; height: 113.34%; overflow: visible; pointer-events: none; }
+.vault-bolt { transform-box: fill-box; transition: transform .5s cubic-bezier(.5, 0, .3, 1); }
+.vault-intro.is-unlocked .vault-bolt { transform: translateY(46px); }
+
+/* the wheel */
+.vault-wheel {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--door) * .58); aspect-ratio: 1; translate: -50% -50%;
+  border: 0; padding: 0; background: none; cursor: grab; border-radius: 50%; touch-action: none;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .6));
+}
+.vault-wheel:active { cursor: grabbing; }
+.vault-wheel svg { width: 100%; height: 100%; overflow: visible; }
+.vault-wheel:focus-visible { outline: 3px solid #ffb347; outline-offset: 6px; }
+.vault-hub {
+  position: absolute; left: 50%; top: 50%; width: calc(var(--door) * .2); aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; pointer-events: none; box-shadow: 0 6px 16px rgba(0, 0, 0, .6), 0 0 0 4px #3a3e45, 0 0 0 6px rgba(230, 199, 120, .6);
+}
+.vault-hub img { width: 100%; height: 100%; border-radius: 50%; }
+
+/* prompt + skip */
+.vault-prompt {
+  position: absolute; left: 50%; bottom: max(24px, 4vh); translate: -50% 0; text-align: center; width: min(92vw, 520px);
+  font: 500 .8rem/1.5 var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: #cfd3da;
+  transition: opacity .4s;
+}
+.vault-prompt b { display: block; font: 600 clamp(1rem, 2.4vw, 1.3rem)/1.3 var(--font-display); letter-spacing: .1em; color: #e6c778; margin-bottom: 6px; text-transform: none; }
+.vault-prompt svg { width: 22px; height: 22px; display: inline-block; vertical-align: -6px; margin-right: 6px; animation: vault-nudge 2.4s ease-in-out infinite; }
+@keyframes vault-nudge { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-40deg); } }
+.vault-skip {
+  position: absolute; top: max(16px, 2.5vh); right: 16px; min-height: 40px; padding: 9px 16px; border-radius: 999px;
+  border: 1px solid rgba(230, 199, 120, .45); background: rgba(3, 7, 18, .5); color: #e5e7eb; cursor: pointer;
+  font: 600 .8rem/1 var(--font-body); letter-spacing: .08em;
+}
+.vault-skip:hover { border-color: #e6c778; color: #fff; }
+.vault-skip:focus-visible { outline: 3px solid #ffb347; outline-offset: 3px; }
+
+/* sequence states */
+.vault-intro.is-opening .vault-prompt { opacity: 0; }
+.vault-intro.is-open .vault-door { transform: rotateY(-112deg); }
+.vault-intro.is-entering .vault-scene { transform: scale(4.2); }
+.vault-intro.is-entering { opacity: 0; }
+.vault-intro.is-skipping { opacity: 0; transition-duration: .35s; }
+
+/* hero = inside the vault */
+.hero.vault-room { background: #05070d; }
+.hero.vault-room::before {
+  content: ''; position: absolute; inset: 0; z-index: 0;
+  background: #05070d image-set(url('../img/vault-interior.webp') type('image/webp'), url('../img/vault-interior.jpg') type('image/jpeg')) center 42% / cover;
+  transform: scale(1.14); transition: transform 2.6s cubic-bezier(.2, .7, .2, 1);
+}
+@media (max-width: 700px) {
+  .hero.vault-room::before { background-image: image-set(url('../img/vault-interior-960.webp') type('image/webp'), url('../img/vault-interior.jpg') type('image/jpeg')); }
+}
+.hero.vault-room::after { /* readability veil over the boxes */
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 50%, rgba(3, 5, 10, .78), rgba(3, 5, 10, .45) 70%, rgba(3, 5, 10, .2)),
+    linear-gradient(180deg, rgba(3, 5, 10, .35), transparent 25%, transparent 75%, rgba(3, 5, 10, .55));
+}
+.vault-entered .hero.vault-room::before, html:not(.js) .hero.vault-room::before { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero.vault-room::before { transform: none; transition: none; }
+  .vault-prompt svg { animation: none; }
+}

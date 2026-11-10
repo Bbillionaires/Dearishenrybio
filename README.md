@@ -1,7 +1,7 @@
 # De'Aris Henry — Executive Portfolio & Professional Resume
 
-A static, dependency-free website (HTML/CSS/vanilla JS). Light, spacious pages framed by a dark
-starfield hero and a dark signature footer. No build step is needed to
+A static, dependency-free website (HTML/CSS/vanilla JS). Visitors enter through a bank-vault door;
+inside, the hero sits in the vault, followed by light, spacious pages and a dark signature footer. No build step is needed to
 serve it; the `tools/` scripts only regenerate assets.
 
 ## Structure
@@ -10,7 +10,7 @@ serve it; the `tools/` scripts only regenerate assets.
 |---|---|
 | `index.html` | The full portfolio (all sections, SEO metadata, JSON-LD) |
 | `assets/css/styles.css` | Design system: colors, glass panels, coin, map, signature |
-| `assets/js/starfield.js` | Canvas starfield and bidirectional meteors |
+| `assets/js/vault.js`, `assets/css/vault.css` | Vault-door entrance and the vault-interior hero |
 | `assets/js/main.js` | Navigation, reveal effects, map, contact form, signature |
 | `assets/js/site-config.js` | **Edit this:** contact details, form endpoint, verified records, book links |
 | `resume/index.html` | ATS-friendly printable resume (source of the PDF) |
@@ -55,10 +55,12 @@ The site is configured for **https://dearishenry.com** (canonical URL, social pr
 
 ## Animation behavior
 
-- The starfield lives in the hero banner and pauses while the hero is scrolled out of view.
-
-- The starfield starts on every visit. It pauses while the tab is hidden and resumes when the tab is
-  visible again, and it restarts after a back/forward-cache restore (`pageshow`). It uses no storage flags.
-- With `prefers-reduced-motion`, the sky is static (no meteors), the coin is still, and the
-  signature appears without the drawing animation.
-- `window.Starfield.init()` / `.destroy()` make it safe to use with client-side routers.
+- **Vault entrance:** on every visit, a vault door fills the screen. Its wheel turns
+  counter-clockwise, the bolts retract, the door swings open, and the view moves into the vault.
+  Visitors can drag the wheel counter-clockwise themselves, click or tap it, press Enter, Space or ←,
+  or wait about 2.4 seconds for it to open on its own. **Skip intro** or Esc goes straight in.
+- The entrance is skipped for deep links (for example `/#contact`) and for visitors with
+  `prefers-reduced-motion`. It uses no storage flags. A failsafe in `<head>` removes the door if
+  `vault.js` fails to load.
+- The page behind the door is `inert` until the vault is open.
+- Vault interior artwork: `tools/vault.html` → `assets/img/vault-interior*.webp/.jpg` (`npm run gen:assets`).

@@ -2,7 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <script>document.documentElement.classList.add('js')</script>
+  <script>
+    (function (d) {
+      d.classList.add('js');
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduce && location.hash.length < 2) {
+        d.classList.add('vault-active');
+        // failsafe: never leave visitors locked out if vault.js fails to load
+        setTimeout(function () { if (!window.__vaultReady) d.classList.remove('vault-active'); }, 8000);
+      }
+    })(document.documentElement);
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>De'Aris Henry — Entrepreneur, Business Strategist &amp; Sales and Operations Leader</title>
   <meta name="description" content="Executive portfolio and professional resume of De'Aris Henry, a Jacksonville, Florida–based entrepreneur, business strategist, sales and operations leader, recruiter, investor, author, and creative producer.">
@@ -20,7 +30,7 @@
   <meta property="og:image" content="https://dearishenry.com/assets/img/og-image.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="De'Aris Henry — gold DH coin on a starfield">
+  <meta property="og:image:alt" content="De'Aris Henry — gold DH coin inside a bank vault">
   <meta property="profile:first_name" content="De'Aris">
   <meta property="profile:last_name" content="Henry">
   <meta name="twitter:card" content="summary_large_image">
@@ -37,7 +47,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="assets/img/dh-coin-front.webp" type="image/webp">
+  <link rel="preload" as="image" href="assets/img/vault-interior.webp" type="image/webp">
   <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/vault.css">
 
   <script type="application/ld+json">
   {
@@ -57,6 +69,53 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+  <div class="vault-intro" id="vault-intro" role="dialog" aria-modal="true" aria-labelledby="vault-title">
+    <h2 id="vault-title" class="visually-hidden">Vault entrance — turn the wheel to enter</h2>
+    <button class="vault-skip" type="button" data-vault-skip>Skip intro</button>
+    <div class="vault-scene">
+      <div class="vault-frame" aria-hidden="true"></div>
+      <div class="vault-doorway" aria-hidden="true"></div>
+      <div class="vault-hinges" aria-hidden="true"><span></span><span></span></div>
+      <div class="vault-door-3d">
+        <div class="vault-door">
+          <div class="vault-door__edge" style="--z:calc(var(--thick) * -0.143)"></div><div class="vault-door__edge" style="--z:calc(var(--thick) * -0.286)"></div><div class="vault-door__edge" style="--z:calc(var(--thick) * -0.429)"></div><div class="vault-door__edge" style="--z:calc(var(--thick) * -0.571)"></div><div class="vault-door__edge" style="--z:calc(var(--thick) * -0.714)"></div><div class="vault-door__edge" style="--z:calc(var(--thick) * -0.857)"></div><div class="vault-door__edge" style="--z:calc(var(--thick) * -1.000)"></div><div class="vault-door__back" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="vault-door__face">
+            <svg class="vault-door__art" viewBox="-40 -40 680 680" aria-hidden="true">
+                <defs>
+                  <linearGradient id="vBolt" x1="0" x2="1"><stop offset="0" stop-color="#5b6068"/><stop offset=".45" stop-color="#e3e6ea"/><stop offset="1" stop-color="#6d727a"/></linearGradient>
+                  <radialGradient id="vRivet" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#f1f3f5"/><stop offset=".6" stop-color="#8b9098"/><stop offset="1" stop-color="#3a3e45"/></radialGradient>
+                  <radialGradient id="vPlate" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="#9aa0a8" stop-opacity=".25"/><stop offset="1" stop-color="#1c1f24" stop-opacity=".55"/></radialGradient>
+                  <mask id="vBoltMask" maskUnits="userSpaceOnUse" x="-40" y="-40" width="680" height="680"><rect x="-40" y="-40" width="680" height="680" fill="#fff"/><circle cx="300" cy="300" r="292" fill="#000"/></mask>
+                  <path id="vRing" d="M 300 300 m -274 0 a 274 274 0 1 1 548 0 a 274 274 0 1 1 -548 0"/>
+                </defs>
+                <g mask="url(#vBoltMask)"><g transform="translate(300 300) rotate(0)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(30)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(60)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(90)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(120)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(150)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(180)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(210)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(240)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(270)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(300)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g><g transform="translate(300 300) rotate(330)"><rect class="vault-bolt" x="-15" y="-330" width="30" height="50" rx="5" fill="url(#vBolt)" stroke="#2c3036" stroke-width="2"/></g></g>
+                <circle cx="300" cy="300" r="286" fill="none" stroke="#2c3036" stroke-width="3"/>
+                <circle cx="300" cy="300" r="262" fill="none" stroke="#2c3036" stroke-width="3"/>
+                <circle cx="300" cy="300" r="259" fill="none" stroke="#d7dbe0" stroke-opacity=".5" stroke-width="1.5"/>
+                <text font-family="Cinzel, serif" font-weight="700" font-size="17" letter-spacing="7" fill="#6f5416" fill-opacity=".9"><textPath href="#vRing" startOffset="0">DE'ARIS HENRY · THE VAULT · BUILDING BUSINESSES · DEVELOPING TALENT · EXECUTING STRATEGY ·</textPath></text>
+                <circle cx="544.0" cy="300.0" r="6" fill="url(#vRivet)"/><circle cx="535.7" cy="363.2" r="6" fill="url(#vRivet)"/><circle cx="511.3" cy="422.0" r="6" fill="url(#vRivet)"/><circle cx="472.5" cy="472.5" r="6" fill="url(#vRivet)"/><circle cx="422.0" cy="511.3" r="6" fill="url(#vRivet)"/><circle cx="363.2" cy="535.7" r="6" fill="url(#vRivet)"/><circle cx="300.0" cy="544.0" r="6" fill="url(#vRivet)"/><circle cx="236.8" cy="535.7" r="6" fill="url(#vRivet)"/><circle cx="178.0" cy="511.3" r="6" fill="url(#vRivet)"/><circle cx="127.5" cy="472.5" r="6" fill="url(#vRivet)"/><circle cx="88.7" cy="422.0" r="6" fill="url(#vRivet)"/><circle cx="64.3" cy="363.2" r="6" fill="url(#vRivet)"/><circle cx="56.0" cy="300.0" r="6" fill="url(#vRivet)"/><circle cx="64.3" cy="236.8" r="6" fill="url(#vRivet)"/><circle cx="88.7" cy="178.0" r="6" fill="url(#vRivet)"/><circle cx="127.5" cy="127.5" r="6" fill="url(#vRivet)"/><circle cx="178.0" cy="88.7" r="6" fill="url(#vRivet)"/><circle cx="236.8" cy="64.3" r="6" fill="url(#vRivet)"/><circle cx="300.0" cy="56.0" r="6" fill="url(#vRivet)"/><circle cx="363.2" cy="64.3" r="6" fill="url(#vRivet)"/><circle cx="422.0" cy="88.7" r="6" fill="url(#vRivet)"/><circle cx="472.5" cy="127.5" r="6" fill="url(#vRivet)"/><circle cx="511.3" cy="178.0" r="6" fill="url(#vRivet)"/><circle cx="535.7" cy="236.8" r="6" fill="url(#vRivet)"/>
+                <circle cx="300" cy="300" r="226" fill="url(#vPlate)" stroke="#e6c778" stroke-opacity=".6" stroke-width="3"/>
+                <path d="M420.0 300.0L522.0 300.0M418.2 320.8L518.6 338.5M412.8 341.0L508.6 375.9M403.9 360.0L492.3 411.0M391.9 377.1L470.1 442.7M377.1 391.9L442.7 470.1M360.0 403.9L411.0 492.3M341.0 412.8L375.9 508.6M320.8 418.2L338.5 518.6M300.0 420.0L300.0 522.0M279.2 418.2L261.5 518.6M259.0 412.8L224.1 508.6M240.0 403.9L189.0 492.3M222.9 391.9L157.3 470.1M208.1 377.1L129.9 442.7M196.1 360.0L107.7 411.0M187.2 341.0L91.4 375.9M181.8 320.8L81.4 338.5M180.0 300.0L78.0 300.0M181.8 279.2L81.4 261.5M187.2 259.0L91.4 224.1M196.1 240.0L107.7 189.0M208.1 222.9L129.9 157.3M222.9 208.1L157.3 129.9M240.0 196.1L189.0 107.7M259.0 187.2L224.1 91.4M279.2 181.8L261.5 81.4M300.0 180.0L300.0 78.0M320.8 181.8L338.5 81.4M341.0 187.2L375.9 91.4M360.0 196.1L411.0 107.7M377.1 208.1L442.7 129.9M391.9 222.9L470.1 157.3M403.9 240.0L492.3 189.0M412.8 259.0L508.6 224.1M418.2 279.2L518.6 261.5" stroke="#1c1f24" stroke-opacity=".35" stroke-width="2"/>
+                <circle cx="300" cy="300" r="120" fill="none" stroke="#2c3036" stroke-opacity=".6" stroke-width="3"/>
+              </svg>
+          </div>
+          <button class="vault-wheel" type="button" aria-label="Turn the vault wheel counter-clockwise to open">
+            <svg viewBox="-100 -100 200 200" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="wSpoke" x1="0" x2="1"><stop offset="0" stop-color="#6d727a"/><stop offset=".5" stop-color="#eef0f2"/><stop offset="1" stop-color="#5b6068"/></linearGradient>
+                    <radialGradient id="wKnob" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#e6c778"/><stop offset="1" stop-color="#6f5416"/></radialGradient>
+                    <linearGradient id="wRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e6ea"/><stop offset=".5" stop-color="#6d727a"/><stop offset="1" stop-color="#c9ced6"/></linearGradient>
+                  </defs>
+                  <g transform="rotate(0)"><rect x="-6" y="-84" width="12" height="56" rx="5" fill="url(#wSpoke)" stroke="#2c3036" stroke-width="1.2"/><circle cx="0" cy="-88" r="11" fill="url(#wKnob)" stroke="#2c3036" stroke-width="1.2"/></g><g transform="rotate(72)"><rect x="-6" y="-84" width="12" height="56" rx="5" fill="url(#wSpoke)" stroke="#2c3036" stroke-width="1.2"/><circle cx="0" cy="-88" r="11" fill="url(#wKnob)" stroke="#2c3036" stroke-width="1.2"/></g><g transform="rotate(144)"><rect x="-6" y="-84" width="12" height="56" rx="5" fill="url(#wSpoke)" stroke="#2c3036" stroke-width="1.2"/><circle cx="0" cy="-88" r="11" fill="url(#wKnob)" stroke="#2c3036" stroke-width="1.2"/></g><g transform="rotate(216)"><rect x="-6" y="-84" width="12" height="56" rx="5" fill="url(#wSpoke)" stroke="#2c3036" stroke-width="1.2"/><circle cx="0" cy="-88" r="11" fill="url(#wKnob)" stroke="#2c3036" stroke-width="1.2"/></g><g transform="rotate(288)"><rect x="-6" y="-84" width="12" height="56" rx="5" fill="url(#wSpoke)" stroke="#2c3036" stroke-width="1.2"/><circle cx="0" cy="-88" r="11" fill="url(#wKnob)" stroke="#2c3036" stroke-width="1.2"/></g>
+                  <circle r="36" fill="none" stroke="url(#wRing)" stroke-width="12"/>
+                </svg>
+          </button>
+          <div class="vault-hub" aria-hidden="true"><img src="assets/img/dh-coin-front.webp" alt="" width="512" height="512"></div>
+        </div>
+      </div>
+    </div>
+    <p class="vault-prompt" aria-hidden="true"><b>Welcome to the Vault</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Turn the wheel counter-clockwise to enter</p>
+  </div>
 
   <div class="page">
     <header class="site-header">
@@ -95,8 +154,7 @@
 
     <main id="main">
       <!-- ================= HERO ================= -->
-      <section class="hero theme-dark" id="top" aria-labelledby="hero-name">
-        <canvas id="starfield" aria-hidden="true"></canvas>
+      <section class="hero theme-dark vault-room" id="top" aria-labelledby="hero-name">
         <div class="container">
           <div class="coin-stage" role="img" aria-label="Rotating gold DH coin with crown, laurel branches, and stars">
             <div class="coin-tilt">
@@ -928,7 +986,7 @@
   </div>
 
   <script src="assets/js/site-config.js"></script>
-  <script src="assets/js/starfield.js"></script>
+  <script src="assets/js/vault.js"></script>
   <script src="assets/js/main.js"></script>
 </body>
 </html>

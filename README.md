@@ -49,6 +49,9 @@ pen strokes with a broad-nib width model), `tools/build-map.mjs` (Natural Earth 
 
 ## Deploying
 
+**Production branch: `main`.** Vercel deploys every push to `main` to https://dearishenry.com.
+Other branches get preview deployments only.
+
 Upload the repository root to any static host (Vercel, Netlify, GitHub Pages, Cloudflare Pages).
 The site is configured for **https://dearishenry.com** (canonical URL, social preview images,
 `sitemap.xml`). If the domain changes, search the repo for `dearishenry.com`.

@@ -109,7 +109,7 @@ try {
   const anchors = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].map((a) => a.getAttribute('href')).filter((h) => h.length > 1 && !document.getElementById(h.slice(1))));
   check('all in-page anchors resolve', anchors.length === 0, anchors.join(', '));
   const navCount = await page.locator('#site-nav a[href^="#"]').count();
-  check('primary nav has 11 sections', navCount === 11, String(navCount));
+  check('primary nav is trimmed to 9 sections', navCount === 9, String(navCount));
 
   // images have alt attributes
   const noAlt = await page.evaluate(() => [...document.images].filter((i) => !i.hasAttribute('alt')).map((i) => i.src));
@@ -157,10 +157,13 @@ try {
 
   // content guardrails
   const text = await page.evaluate(() => document.body.innerText);
-  check('illustrative scope labeled', /illustrative scope value,? not verified collected revenue/i.test(text) || /Illustrative scope value — not verified collected revenue/i.test(text));
-  check('$10,080 shown', text.includes('$10,080'));
   check('real estate: 55+ homes, ≈$2.5M estimated, no deal boxes', text.includes('55+') && /\$2\.5M/.test(text) && !/Lorenzo Court|\$315,000|\$145,000/.test(text));
   check('film: Backwoods Blood Feud produced + POON coming soon + IMDb link', /Backwoods Blood Feud/.test(text) && /Coming Soon/i.test(text) && await page.locator('a[href="https://www.imdb.com/name/nm15804821/"]').count() > 0);
+  check('no landscaping details or concept-stage ideas', !/landscap|Duval|\bconcept\b/i.test(text), (text.match(/.{30}(landscap|Duval|concept).{30}/i) || [''])[0]);
+  const bookTitles = await page.$$eval('#books .book h3', (h) => h.map((x) => x.textContent.trim()));
+  check('books: the five current titles', JSON.stringify(bookTitles) === JSON.stringify(["The Family Structure Almanac", "Who's Driving My Car?", "Tia and Henry First Time Homebuyer Journey", "The Negotiation House", "The Henry Memory Method of Negotiations™"]), bookTitles.join(' | '));
+  check('film: Chuck and Buck children\'s Christian animation listed', /Chuck and Buck/.test(text) && /Children's Christian animated movie/i.test(text));
+  check('skills section lists skills only (chips)', await page.locator('#skills .chip-list li').count() >= 20 && await page.locator('#skills .skill-group p').count() === 0);
   check('Greenwood 100 nonprofit mission shown', /Greenwood 100 Inc\./.test(text) && /community development, education, and job growth/.test(text));
   check('footer copyright', text.includes("© 2026 De'Aris Henry. All Rights Reserved."));
   check('signature is the last footer element', await page.evaluate(() => !!document.querySelector('.site-footer .signature')));

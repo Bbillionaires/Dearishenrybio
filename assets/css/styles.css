@@ -449,8 +449,8 @@ tfoot .label-tag { display: block; font: 600 .7rem/1.3 var(--font-body); letter-
 .film-project .meta { font-size: .82rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-faint); margin: -4px 0 12px; }
 
 /* ---------- Books ---------- */
-.library { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); gap: 22px; }
-.book { display: grid; grid-template-columns: 104px 1fr; gap: 18px; align-items: start; }
+.library { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 32px 24px; }
+.book { display: block; }
 .book-cover {
   aspect-ratio: 2/3; border-radius: 4px 8px 8px 4px; position: relative; overflow: hidden;
   padding: 12px 10px; display: flex; flex-direction: column; justify-content: space-between;
@@ -461,17 +461,19 @@ tfoot .label-tag { display: block; font: 600 .7rem/1.3 var(--font-body); letter-
 .book-cover .bc-title { font: 700 .8rem/1.2 var(--font-display); color: #f6e3a8; letter-spacing: .05em; position: relative; }
 .book-cover .bc-mark { font-size: 1.6rem; line-height: 1; color: var(--gold); text-align: center; position: relative; }
 .book-cover .bc-author { font: 600 .5rem/1.2 var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: #b4bccb; position: relative; }
-.book h3 { margin: 8px 0 6px; font-size: 1.08rem; }
+.book h3 { margin: 14px 0 4px; font-size: .98rem; line-height: 1.3; }
+.book .book-cover { padding: 14px 12px; }
+.book .book-cover .bc-title { font-size: .86rem; }
 .book p { color: var(--text-dim); font-size: .9rem; margin-bottom: .6em; }
 .book .book-meta { font-size: .8rem; color: var(--text-faint); font-variant-numeric: tabular-nums; }
 .book details summary { cursor: pointer; color: var(--accent); font-size: .86rem; font-weight: 500; }
 .book details p { margin-top: .5em; }
 .book .purchase { display: inline-block; margin-top: 6px; font-size: .78rem; color: var(--text-faint); }
-@media (max-width: 420px) { .book { grid-template-columns: 84px 1fr; gap: 14px; } }
+@media (max-width: 420px) { .library { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; } }
 
 /* ---------- Skills matrix ---------- */
-.skills-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 36px 32px; }
-.skill-group h3 { font-size: 1rem; display: flex; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line-strong); }
+.skills-matrix { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 40px 48px; }
+.skill-group h3 { font-size: 1rem; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .skill-group h3::before { content: ''; width: 8px; height: 8px; transform: rotate(45deg); background: var(--gold); }
 .skill-group ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
 .skill-group li { font-size: .9rem; color: var(--text-dim); }
@@ -539,3 +541,32 @@ tfoot .label-tag { display: block; font: 600 .7rem/1.3 var(--font-body); letter-
   .hero, .site-footer { background: #fff; }
   .panel, .card, .case { box-shadow: none; }
 }
+
+/* ---------- Experience timeline ---------- */
+.exp-list { display: grid; gap: 0; max-width: 860px; }
+.exp { display: grid; grid-template-columns: 200px 1fr; gap: 24px; padding: 24px 0; border-top: 1px solid var(--line); }
+.exp:last-child { border-bottom: 1px solid var(--line); }
+.exp h3 { margin: 0 0 6px; }
+.exp p { margin: 0; }
+.exp-when { font: 600 .78rem/1.6 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+@media (max-width: 640px) { .exp { grid-template-columns: 1fr; gap: 6px; } }
+
+/* ---------- Ventures (plain rows) ---------- */
+.venture-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 32px 40px; }
+.venture { padding-top: 18px; border-top: 2px solid var(--gold); }
+.venture h3 { margin-bottom: 6px; }
+.venture p { margin: 0; }
+
+/* ---------- Film extras ---------- */
+.film-projects { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+.film-project { grid-template-columns: minmax(0, 140px) 1fr; gap: 20px; }
+.poster--sky {
+  background:
+    radial-gradient(circle at 75% 22%, rgba(255, 236, 160, .75), transparent 22%),
+    radial-gradient(ellipse at 50% 120%, rgba(74, 222, 128, .45), transparent 55%),
+    linear-gradient(180deg, #1e3a8a, #2563eb 55%, #0f5132);
+}
+.status--family { color: var(--dev); }
+.skill-group .chip-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.film-project .poster { padding: 12px; }
+.film-project .poster-title { font-size: .84rem; letter-spacing: .04em; overflow-wrap: normal; }

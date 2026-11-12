@@ -128,21 +128,32 @@ try {
   await page.locator('#contact-form button[type=submit]').click();
   const invalid = await page.evaluate(() => [...document.querySelectorAll('#contact-form [aria-invalid="true"]')].map((e) => e.name));
   check('contact form validates required fields', ['name', 'email', 'type', 'message'].every((n) => invalid.includes(n)), invalid.join(','));
-  // Never send real email from tests: intercept the form backend.
+  // Never send real email from tests: ONE stub intercepts the form backend for the whole run.
   const cfgEmail = await page.evaluate(() => window.SITE_CONFIG.contact.email);
   let posted = null;
+  let formReply = 'activation';
   await page.route(/formsubmit\.co|formspree\.io/, async (route) => {
     posted = { url: route.request().url(), body: JSON.parse(route.request().postData() || '{}') };
-    await route.fulfill({ status: 200, contentType: 'application/json', body: '{"success":"true"}' });
+    const body = formReply === 'activation'
+      ? { success: 'false', message: "This form needs Activation. We've sent you an email containing an 'Activate Form' button." }
+      : { success: 'true' };
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
   });
-  await page.evaluate(() => { document.getElementById('form-status').className = 'form-status'; });
-  await page.fill('#cf-name', 'Test Person');
-  await page.fill('#cf-email', 'test@example.com');
-  await page.selectOption('#cf-type', 'Investment');
-  await page.fill('#cf-message', 'Interested in discussing a partnership.');
-  await page.locator('#contact-form button[type=submit]').click();
-  await page.waitForFunction(() => /is-(success|error)/.test(document.getElementById('form-status').className));
-  const status2 = await page.evaluate(() => document.getElementById('form-status').className);
+  const submitForm = async (msg) => {
+    await page.evaluate(() => { document.getElementById('form-status').className = 'form-status'; });
+    await page.fill('#cf-name', 'Test Person');
+    await page.fill('#cf-email', 'test@example.com');
+    await page.selectOption('#cf-type', 'Investment');
+    await page.fill('#cf-message', msg);
+    await page.locator('#contact-form button[type=submit]').click();
+    await page.waitForFunction(() => /is-(info|error|success)/.test(document.getElementById('form-status').className), null, { timeout: 10000 });
+    return page.getAttribute('#form-status', 'class');
+  };
+  // FormSubmit's one-time activation reply should read as "almost ready", not an error
+  const actCls = await submitForm('Activation path check message.');
+  check('form: FormSubmit activation reply shows an info message, not an error', /is-info/.test(actCls) && /activated/i.test(await page.textContent('#form-status')), actCls);
+  formReply = 'success';
+  const status2 = await submitForm('Interested in discussing a partnership.');
   check('contact form posts to the configured inbox endpoint', posted && posted.url.includes(cfgEmail) && posted.body.opportunityType === 'Investment' && /is-success/.test(status2), JSON.stringify(posted));
   const emailShown = await page.evaluate(() => document.body.innerText.includes(window.SITE_CONFIG.contact.email));
   check('private inbox address not displayed on page', !emailShown);

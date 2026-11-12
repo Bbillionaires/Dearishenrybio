@@ -147,12 +147,22 @@
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(Object.assign({ _subject: 'Website inquiry — ' + data.opportunityType, _template: 'table', _captcha: 'false', _replyto: data.email }, data)),
         }).then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json().catch(function () { return {}; });
-        }).then(function (res) {
-          if (res && (res.success === false || res.success === 'false')) throw new Error(res.message || 'rejected');
-          form.reset();
-          show('success', 'Thank you, ' + data.name.split(' ')[0] + '. Your message has been sent — I will be in touch.');
+          return r.json().catch(function () { return {}; }).then(function (res) { return { ok: r.ok, status: r.status, res: res || {} }; });
+        }).then(function (out) {
+          var res = out.res, msg = String(res.message || '');
+          var rejected = res.success === false || res.success === 'false';
+          if (out.ok && !rejected) {
+            form.reset();
+            show('success', 'Thank you, ' + data.name.split(' ')[0] + '. Your message has been sent — I will be in touch.');
+            return;
+          }
+          if (window.console) console.warn('[contact] form service replied:', out.status, msg || res);
+          if (/activat/i.test(msg)) {
+            // FormSubmit's one-time setup: the inbox owner must click "Activate Form" in its email.
+            show('info', 'Almost ready — this contact form is being activated. Please try again a little later.');
+            return;
+          }
+          throw new Error(msg || ('HTTP ' + out.status));
         }).catch(function () {
           show('error', 'Your message could not be sent right now. Please try again shortly' + (C.email && C.showEmail ? ' or email ' + C.email + '.' : '.'));
         }).then(function () { btn.disabled = false; btn.textContent = 'Send Message'; });

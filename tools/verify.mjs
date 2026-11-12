@@ -147,7 +147,7 @@ try {
   const emailShown = await page.evaluate(() => document.body.innerText.includes(window.SITE_CONFIG.contact.email));
   check('private inbox address not displayed on page', !emailShown);
   const opts = await page.$$eval('#cf-type option', (o) => o.map((x) => x.textContent).slice(1).join('|'));
-  check('opportunity types', opts === 'Employment|Recruiting|Business Partnership|Sales|Lead Generation|Acquisitions|Real Estate|Investment|Research and Intelligence|Technology (Website/Software Development and Artificial Intelligence)|Film Production|Other', opts);
+  check('opportunity types', opts === 'Employment|Recruiting|Business Partnership|Sales|Lead Generation|Acquisitions|Real Estate|Investment|Research and Intelligence|Technology (Web, Software & AI)|Film Production|Other', opts);
 
   // signature draws when visible
   await page.locator('.signature').scrollIntoViewIfNeeded();

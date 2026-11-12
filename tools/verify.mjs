@@ -165,7 +165,7 @@ try {
   check('film: Chuck and Buck children\'s Christian animation listed', /Chuck and Buck/.test(text) && /Children's Christian animated movie/i.test(text));
   check('skills section lists skills only (chips)', await page.locator('#skills .chip-list li').count() >= 20 && await page.locator('#skills .skill-group p').count() === 0);
   const exp = await page.$$eval('#experience .exp', (els) => els.map((e) => e.querySelector('.exp-when').textContent.trim() + ' | ' + e.querySelector('h3').textContent.trim()));
-  check('experience timeline: roles and dates', JSON.stringify(exp) === JSON.stringify(['2024 – Present | Chef Harvey Foundation', '2022 – Present | Greenwood 100 Inc.', '2020 – 2024 | FEMA Contractor', '2018 – Present | One United Enterprise LLC', '2018 – Present | New Jerusalem Transitional Housing LLC', '2011 – 2019 | Numb3rs 1 LLC', '2009 – 2011 | Merchant Marine', 'Port of Jacksonville | ILA Local 1408 · Longshore']), exp.join(' ; '));
+  check('experience timeline: roles and dates', JSON.stringify(exp) === JSON.stringify(['2024 – Present | Chef Harvey Foundation', '2022 – Present | Greenwood 100 Inc.', '2020 – 2024 | FEMA Contractor', '2018 – Present | One United Enterprise LLC', '2018 – Present | New Jerusalem Transitional Housing LLC', '2011 – 2019 | Numb3rs 1 LLC', '2009 – 2011 | Merchant Marine', '2002 – Present | ILA Local 1408 · Longshore']), exp.join(' ; '));
   check('FEMA: 120 laborers recruited; Savista removed', /Recruited 120 laborers/.test(text) && !/Savista/.test(text));
   check('New Jerusalem links to the letter of support', await page.locator('#experience a[href="#letters"]').count() === 1);
   const letterHref = await page.getAttribute('#letters a.btn', 'href');

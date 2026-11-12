@@ -164,6 +164,8 @@ try {
   check('books: the four current titles', JSON.stringify(bookTitles) === JSON.stringify(["The Family Structure Almanac", "Who's Driving My Car?", "Tia and Henry First Time Homebuyer Journey", "The Negotiation House"]), bookTitles.join(' | '));
   check('The Negotiation House carries the Henry Memory Method subtitle', (await page.textContent('[data-book="the-negotiation-house"] .book-sub')).trim() === 'The Henry Memory Method of Negotiations™');
   check('film: Chuck and Buck children\'s Christian animation listed', /Chuck and Buck/.test(text) && /Children's Christian animated movie/i.test(text));
+  const chips = await page.$$eval('#skills .chip-list li', (l) => l.map((x) => x.textContent));
+  check('skills: lead generation and research & intelligence listed', chips.includes('Lead generation') && chips.includes('Research & intelligence'), chips.join(', '));
   check('skills: OSINT listed as a regular skill tag', (await page.$$eval('#skills .chip-list li', (l) => l.map((x) => x.textContent))).includes('Open source intelligence (OSINT) expert') && await page.locator('.skill-feature').count() === 0);
   check('skills section lists skills only (chips)', await page.locator('#skills .chip-list li').count() >= 20 && await page.locator('#skills .skill-group p').count() === 0);
   const exp = await page.$$eval('#experience .exp', (els) => els.map((e) => e.querySelector('.exp-when').textContent.trim() + ' | ' + e.querySelector('h3').textContent.trim()));

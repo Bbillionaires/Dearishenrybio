@@ -161,7 +161,8 @@ try {
   check('film: Backwoods Blood Feud produced + POON coming soon + IMDb link', /Backwoods Blood Feud/.test(text) && /Coming Soon/i.test(text) && await page.locator('a[href="https://www.imdb.com/name/nm15804821/"]').count() > 0);
   check('no landscaping details or concept-stage ideas', !/landscap|Duval|\bconcept\b/i.test(text), (text.match(/.{30}(landscap|Duval|concept).{30}/i) || [''])[0]);
   const bookTitles = await page.$$eval('#books .book h3', (h) => h.map((x) => x.textContent.trim()));
-  check('books: the five current titles', JSON.stringify(bookTitles) === JSON.stringify(["The Family Structure Almanac", "Who's Driving My Car?", "Tia and Henry First Time Homebuyer Journey", "The Negotiation House", "The Henry Memory Method of Negotiations™"]), bookTitles.join(' | '));
+  check('books: the four current titles', JSON.stringify(bookTitles) === JSON.stringify(["The Family Structure Almanac", "Who's Driving My Car?", "Tia and Henry First Time Homebuyer Journey", "The Negotiation House"]), bookTitles.join(' | '));
+  check('The Negotiation House carries the Henry Memory Method subtitle', (await page.textContent('[data-book="the-negotiation-house"] .book-sub')).trim() === 'The Henry Memory Method of Negotiations™');
   check('film: Chuck and Buck children\'s Christian animation listed', /Chuck and Buck/.test(text) && /Children's Christian animated movie/i.test(text));
   check('skills section lists skills only (chips)', await page.locator('#skills .chip-list li').count() >= 20 && await page.locator('#skills .skill-group p').count() === 0);
   const exp = await page.$$eval('#experience .exp', (els) => els.map((e) => e.querySelector('.exp-when').textContent.trim() + ' | ' + e.querySelector('h3').textContent.trim()));

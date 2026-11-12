@@ -109,7 +109,7 @@ try {
   const anchors = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].map((a) => a.getAttribute('href')).filter((h) => h.length > 1 && !document.getElementById(h.slice(1))));
   check('all in-page anchors resolve', anchors.length === 0, anchors.join(', '));
   const navCount = await page.locator('#site-nav a[href^="#"]').count();
-  check('primary nav is trimmed to 9 sections', navCount === 9, String(navCount));
+  check('primary nav is trimmed to 8 sections', navCount === 8, String(navCount));
 
   // images have alt attributes
   const noAlt = await page.evaluate(() => [...document.images].filter((i) => !i.hasAttribute('alt')).map((i) => i.src));
@@ -164,11 +164,14 @@ try {
   check('books: the five current titles', JSON.stringify(bookTitles) === JSON.stringify(["The Family Structure Almanac", "Who's Driving My Car?", "Tia and Henry First Time Homebuyer Journey", "The Negotiation House", "The Henry Memory Method of Negotiations™"]), bookTitles.join(' | '));
   check('film: Chuck and Buck children\'s Christian animation listed', /Chuck and Buck/.test(text) && /Children's Christian animated movie/i.test(text));
   check('skills section lists skills only (chips)', await page.locator('#skills .chip-list li').count() >= 20 && await page.locator('#skills .skill-group p').count() === 0);
-  check('experience: FEMA Contractor, 2020 – Present', /FEMA Contractor/.test(text) && /2020 – Present/i.test(text));
+  const exp = await page.$$eval('#experience .exp', (els) => els.map((e) => e.querySelector('.exp-when').textContent.trim() + ' | ' + e.querySelector('h3').textContent.trim()));
+  check('experience timeline: roles and dates', JSON.stringify(exp) === JSON.stringify(['2024 – Present | Chef Harvey Foundation', '2022 – Present | Greenwood 100 Inc.', '2020 – 2024 | FEMA Contractor', '2018 – Present | One United Enterprise LLC', '2018 – Present | New Jerusalem Transitional Housing LLC', '2011 – 2019 | Numb3rs 1 LLC', '2009 – 2011 | Merchant Marine', 'Port of Jacksonville | ILA Local 1408 · Longshore']), exp.join(' ; '));
+  check('FEMA: 120 laborers recruited; Savista removed', /Recruited 120 laborers/.test(text) && !/Savista/.test(text));
+  check('New Jerusalem links to the letter of support', await page.locator('#experience a[href="#letters"]').count() === 1);
   const letterHref = await page.getAttribute('#letters a.btn', 'href');
   const letterRes = await page.request.get(new URL(letterHref, BASE).toString());
   check('letter of recommendation section links to the PDF', /Letters of Recommendation/i.test(text) && letterRes.ok() && /application\/pdf/.test(letterRes.headers()['content-type'] || ''), letterHref + ' ' + letterRes.status());
-  check('Greenwood 100 nonprofit mission shown', /Greenwood 100 Inc\./.test(text) && /community development, education, and job growth/.test(text));
+  check('nonprofits: Greenwood 100 and Chef Harvey Foundation (501(c)(3))', /youth education, mentorship, and community growth/i.test(text) && /Chef Harvey Foundation/.test(text) && /Feeding the homeless/i.test(text));
   check('footer copyright', text.includes("© 2026 De'Aris Henry. All Rights Reserved."));
   check('signature is the last footer element', await page.evaluate(() => !!document.querySelector('.site-footer .signature')));
 

@@ -129,7 +129,6 @@ try {
   const invalid = await page.evaluate(() => [...document.querySelectorAll('#contact-form [aria-invalid="true"]')].map((e) => e.name));
   check('contact form validates required fields', ['name', 'email', 'type', 'message'].every((n) => invalid.includes(n)), invalid.join(','));
   // Never send real email from tests: ONE stub intercepts the form backend for the whole run.
-  const cfgEmail = await page.evaluate(() => window.SITE_CONFIG.contact.email);
   let posted = null;
   let formReply = 'activation';
   await page.route(/formsubmit\.co|formspree\.io/, async (route) => {
@@ -154,9 +153,12 @@ try {
   check('form: FormSubmit activation reply shows an info message, not an error', /is-info/.test(actCls) && /activated/i.test(await page.textContent('#form-status')), actCls);
   formReply = 'success';
   const status2 = await submitForm('Interested in discussing a partnership.');
-  check('contact form posts to the configured inbox endpoint', posted && posted.url.includes(cfgEmail) && posted.body.opportunityType === 'Investment' && /is-success/.test(status2), JSON.stringify(posted));
-  const emailShown = await page.evaluate(() => document.body.innerText.includes(window.SITE_CONFIG.contact.email));
+  check('contact form posts to the configured inbox endpoint', posted && posted.url === 'https://formsubmit.co/ajax/c53d44c09565da6b637659e53d270675' && posted.body.opportunityType === 'Investment' && /is-success/.test(status2), JSON.stringify(posted));
+  const emailShown = await page.evaluate(() => /dearishenry@gmail\.com/i.test(document.body.innerText));
   check('private inbox address not displayed on page', !emailShown);
+  const cfgSrc = await (await page.request.get(new URL('assets/js/site-config.js', BASE).toString())).text();
+  const pageSrc = await page.content();
+  check('inbox address absent from the site code (form uses an alias)', !/@gmail\.com|greenwood100inc/i.test(cfgSrc + pageSrc));
   const opts = await page.$$eval('#cf-type option', (o) => o.map((x) => x.textContent).slice(1).join('|'));
   check('opportunity types', opts === 'Employment|Recruiting|Business Partnership|Sales|Lead Generation|Acquisitions|Real Estate|Investment|Research and Intelligence|Technology (Web, Software & AI)|Film Production|Other', opts);
 

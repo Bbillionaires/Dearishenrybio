@@ -5,18 +5,16 @@
  */
 window.SITE_CONFIG = {
   contact: {
-    // Inbox that receives contact-form requests.
-    email: 'dearishenry@gmail.com',
-    // Show the email address publicly on the site and resume? (false = private)
+    // Public email to display on the site/resume. Left empty: the inbox stays private.
+    email: '',
     showEmail: false,
     phone: '',
     linkedin: '', // full URL
     imdb: 'https://www.imdb.com/name/nm15804821/',
-    // Form backend. FormSubmit forwards each submission to the inbox above.
-    // The FIRST submission triggers a one-time activation email from FormSubmit to
-    // that inbox — click "Activate Form" in it, then all later messages arrive.
+    // Form backend: FormSubmit forwards each submission to the owner's inbox.
+    // The random alias keeps the inbox address out of the site's code.
     // Any Formspree-compatible JSON endpoint also works here.
-    formEndpoint: 'https://formsubmit.co/ajax/dearishenry@gmail.com',
+    formEndpoint: 'https://formsubmit.co/ajax/c53d44c09565da6b637659e53d270675',
   },
 
 

@@ -21,7 +21,9 @@ serve it; the `tools/` scripts only regenerate assets.
 
 All values that need verification live in `assets/js/site-config.js`:
 
-- `contact.email`: the inbox that receives contact-form requests (currently dearishenry@gmail.com).
+- `contact.formEndpoint`: the form posts to a private FormSubmit alias that forwards to the owner's inbox,
+  so the address never appears in the site's code.
+- `contact.email`: optional public address to display (empty = private).
 - `contact.showEmail`: `false` keeps the address off the page and resume; `true` displays it.
 - `contact.formEndpoint`: the form backend. It is set to FormSubmit, which forwards each
   submission to the inbox. **The first submission triggers a one-time activation email from

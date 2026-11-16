@@ -183,7 +183,9 @@ try {
   check('skills section lists skills only (chips)', await page.locator('#skills .chip-list li').count() >= 20 && await page.locator('#skills .skill-group p').count() === 0);
   const exp = await page.$$eval('#experience .exp', (els) => els.map((e) => e.querySelector('.exp-when').textContent.trim() + ' | ' + e.querySelector('h3').textContent.trim()));
   check('experience timeline: roles and dates', JSON.stringify(exp) === JSON.stringify(['2024 – Present | Chef Harvey Foundation', '2022 – Present | Greenwood 100 Inc.', '2020 – 2024 | FEMA Contractor', '2018 – Present | One United Enterprise LLC', '2018 – Present | New Jerusalem Transitional Housing LLC', '2011 – 2019 | Numb3rs 1 LLC', '2009 – 2011 | Merchant Marine', "2002 – Present | International Longshoremen's Association (ILA) Local 1408"]), exp.join(' ; '));
-  check('FEMA: 120 laborers recruited; Savista removed', /Recruited 120 laborers/.test(text) && !/Savista/.test(text));
+  check('FEMA: 1st contract 120 and 2nd contract 80 laborers; Savista removed', /1st contract: recruited 120 laborers/i.test(text) && /2nd contract: recruited 80 laborers/i.test(text) && !/Savista/.test(text));
+  const medal = await page.evaluate(() => { const i = document.querySelector('#experience .exp-medal img'); return i && { ok: i.complete && i.naturalWidth > 0, cap: i.closest('figure').querySelector('figcaption').textContent.trim(), inMM: !!i.closest('.exp').querySelector('h3').textContent.includes('Merchant Marine') }; });
+  check('Merchant Marine entry shows the Merchant Marine Expeditionary Medal', medal && medal.cap === 'Merchant Marine Expeditionary Medal' && medal.inMM, JSON.stringify(medal));
   check('New Jerusalem links to the letter of support', await page.locator('#experience a[href="#letters"]').count() === 1);
   const letterHref = await page.getAttribute('#letters a.btn', 'href');
   const letterRes = await page.request.get(new URL(letterHref, BASE).toString());
